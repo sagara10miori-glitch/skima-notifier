@@ -97,10 +97,14 @@ def get_opt_items(user_id):
     return items
 
 
-def send_discord_embed(item, color):
+def send_discord_embed(item, color, is_first):
     """Discord に通知を送る"""
 
-    content = "@everyone"  # ← ここで everyone 通知
+    # 最初の通知だけ @everyone を付ける
+    if is_first:
+        content = "@everyone\n" + CUTE_DIVIDER
+    else:
+        content = CUTE_DIVIDER
 
     embed = {
         "title": item["title"],
@@ -110,8 +114,7 @@ def send_discord_embed(item, color):
         "description": (
             f"**価格：{item['price']}**\n"
             f"**作者：{item['author']}**\n"
-            f"{item['url']}\n\n"
-            f"{CUTE_DIVIDER}"
+            f"**[商品ページはこちら]({item['url']})**\n"
         ),
 
         "color": color
@@ -121,24 +124,28 @@ def send_discord_embed(item, color):
 
 
 def main():
+    # 前回データ読み込み
     if os.path.exists("last_data.json"):
         with open("last_data.json", "r", encoding="utf-8") as f:
             last_data = json.load(f)
     else:
         last_data = {}
 
+    # 監視ユーザー一覧
     with open("users.txt", "r", encoding="utf-8") as f:
         user_ids = [line.strip() for line in f]
 
+    # ユーザー順で色を割り当て
     user_colors = {
         uid: COLOR_LIST[i % len(COLOR_LIST)]
         for i, uid in enumerate(user_ids)
     }
 
     new_last_data = {}
+    is_first_notification = True  # ← 最初の通知だけ @everyone
 
     for uid in user_ids:
-        time.sleep(1)
+        time.sleep(1)  # サーバー負荷軽減
 
         items = get_opt_items(uid)
         new_last_data[uid] = items
@@ -151,8 +158,10 @@ def main():
 
         for item in items:
             if item["url"] in added_urls:
-                send_discord_embed(item, user_colors[uid])
+                send_discord_embed(item, user_colors[uid], is_first_notification)
+                is_first_notification = False  # 2回目以降は @everyone を付けない
 
+    # データ保存
     with open("last_data.json", "w", encoding="utf-8") as f:
         json.dump(new_last_data, f, ensure_ascii=False, indent=2)
 
