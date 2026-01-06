@@ -100,9 +100,9 @@ def get_opt_items(user_id):
 def send_discord_embed(item, color, is_first):
     """Discord に通知を送る"""
 
-    # 最初の通知だけ @everyone を付ける
+    # 最初の通知だけ @everyone（区切り線なし）
     if is_first:
-        content = "@everyone\n" + CUTE_DIVIDER
+        content = "@everyone"
     else:
         content = CUTE_DIVIDER
 
