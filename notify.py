@@ -51,7 +51,6 @@ def parse_item(card):
     # ---- 価格を「◯◯円」形式に統一 ----
     price = None
     if price_raw:
-        # 数字だけ抽出
         digits = "".join(c for c in price_raw if c.isdigit())
         if digits:
             price = f"{int(digits):,}円"
@@ -95,10 +94,13 @@ def get_opt_items(user_id):
 
 
 def send_batch_notification(all_new_items):
-    """Embed を複数添付してバッチ通知（空行なし・区切り線なし）"""
+    """Embed を複数添付してバッチ通知（空行なし・区切り線なし・価格の安い順）"""
 
     if not all_new_items:
         return
+
+    # ---- 価格の安い順にソート ----
+    all_new_items.sort(key=lambda x: int("".join(c for c in x["price"] if c.isdigit())))
 
     # --- メッセージ本文（content） ---
     if is_quiet_hours():
