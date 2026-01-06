@@ -15,12 +15,10 @@ DIVIDER = "✦━━━━━━━━━━━━✦"
 
 
 def is_quiet_hours():
-    """0:30〜7:30 の間は True を返す"""
+    """0:30〜7:30 の間は True"""
     now = datetime.now()
-    h = now.hour
-    m = now.minute
+    h, m = now.hour, now.minute
 
-    # 0:30〜7:30 の判定
     if (h == 0 and m >= 30) or (1 <= h <= 6) or (h == 7 and m < 30):
         return True
     return False
@@ -87,33 +85,43 @@ def get_opt_items(user_id):
 
 
 def send_batch_notification(all_new_items):
-    """まとめて1メッセージで通知（区切り線は間だけ）"""
+    """Embed を複数添付してバッチ通知（最初の区切り線なし）"""
 
     if not all_new_items:
         return
 
-    lines = []
+    # --- メッセージ本文（content） ---
+    content_lines = []
 
-    # 静かな時間帯なら @everyone を付けない
+    # 静かな時間帯でなければ @everyone を付ける
     if not is_quiet_hours():
-        lines.append("@everyone")
-        lines.append("")  # 空行
+        content_lines.append("@everyone")
+        content_lines.append("")  # 空行
 
-    for i, item in enumerate(all_new_items):
-        lines.append(
-            f"**{item['title']}**\n"
-            f"**価格：{item['price']}**\n"
-            f"**作者：{item['author']}**\n"
-            f"**URL：{item['url']}**\n"
-        )
+    # 区切り線は「最初以外」に入れる
+    for i in range(len(all_new_items)):
+        if i > 0:
+            content_lines.append(DIVIDER)
 
-        # 最後以外は区切り線
-        if i < len(all_new_items) - 1:
-            lines.append(DIVIDER)
+    content = "\n".join(content_lines)
 
-    content = "\n".join(lines)
+    # --- Embed を作成 ---
+    embeds = []
+    for item in all_new_items:
+        embed = {
+            "title": item["title"],
+            "url": item["url"],
+            "image": {"url": item["image"]},
+            "description": (
+                f"**価格：{item['price']}**\n"
+                f"**作者：{item['author']}**\n"
+                f"**[商品ページはこちら]({item['url']})**"
+            )
+        }
+        embeds.append(embed)
 
-    requests.post(WEBHOOK_URL, json={"content": content})
+    # --- Discord に送信 ---
+    requests.post(WEBHOOK_URL, json={"content": content, "embeds": embeds})
 
 
 def main():
@@ -145,7 +153,7 @@ def main():
             if item["url"] in added_urls:
                 all_new_items.append(item)
 
-    # バッチ通知
+    # バッチ通知（Embed）
     send_batch_notification(all_new_items)
 
     with open("last_data.json", "w", encoding="utf-8") as f:
