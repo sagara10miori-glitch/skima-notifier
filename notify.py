@@ -11,8 +11,6 @@ HEADERS = {
     "User-Agent": "SKIMA-Notifier/1.0 (+GitHub Actions; contact: example@example.com)"
 }
 
-DIVIDER = "✦━━━━━━━━━━━━✦"
-
 
 def is_quiet_hours():
     """0:30〜7:30 の間は True"""
@@ -48,7 +46,19 @@ def parse_item(card):
     image = img_tag["src"] if img_tag else None
 
     price_tag = card.select_one(".price")
-    price = price_tag.text.strip() if price_tag else None
+    price_raw = price_tag.text.strip() if price_tag else None
+
+    # ---- 価格を「◯◯円」形式に統一 ----
+    price = None
+    if price_raw:
+        # 数字だけ抽出
+        digits = "".join(c for c in price_raw if c.isdigit())
+        if digits:
+            price = f"{int(digits):,}円"
+        else:
+            price = price_raw
+    else:
+        price = "価格不明"
 
     link_tag = card.select_one(".image a")
     url = "https://skima.jp" + link_tag["href"] if link_tag else None
@@ -85,25 +95,16 @@ def get_opt_items(user_id):
 
 
 def send_batch_notification(all_new_items):
-    """Embed を複数添付してバッチ通知（最初の区切り線なし）"""
+    """Embed を複数添付してバッチ通知（空行なし・区切り線なし）"""
 
     if not all_new_items:
         return
 
     # --- メッセージ本文（content） ---
-    content_lines = []
-
-    # 静かな時間帯でなければ @everyone を付ける
-    if not is_quiet_hours():
-        content_lines.append("@everyone")
-        content_lines.append("")  # 空行
-
-    # 区切り線は「最初以外」に入れる
-    for i in range(len(all_new_items)):
-        if i > 0:
-            content_lines.append(DIVIDER)
-
-    content = "\n".join(content_lines)
+    if is_quiet_hours():
+        content = ""  # 静かな時間帯は @everyone なし
+    else:
+        content = "@everyone"
 
     # --- Embed を作成 ---
     embeds = []
