@@ -3,8 +3,7 @@ from bs4 import BeautifulSoup
 import json
 import os
 import time
-from datetime import datetime, timedelta, timezone
-JST = timezone(timedelta(hours=9))
+from datetime import datetime
 
 WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
 
@@ -12,9 +11,12 @@ HEADERS = {
     "User-Agent": "SKIMA-Notifier/1.0 (+GitHub Actions; contact: example@example.com)"
 }
 
+ORANGE = 0xFFA500  # Embed の色（オレンジ）
+
 
 def is_quiet_hours():
-    now = datetime.now(JST)
+    """0:30〜7:30 の間は True"""
+    now = datetime.now()
     h, m = now.hour, now.minute
 
     return (
@@ -22,6 +24,7 @@ def is_quiet_hours():
         (1 <= h <= 6) or
         (h == 7 and m < 30)
     )
+
 
 def fetch_html(url, retries=2, delay=2):
     for attempt in range(retries + 1):
@@ -49,15 +52,13 @@ def parse_item(card):
     price_tag = card.select_one(".price")
     price_raw = price_tag.text.strip() if price_tag else None
 
-    # ---- 価格を「◯◯円」形式に統一 ----
-    price = None
+    # ---- 価格を「◯◯円」形式に統一し、数値も保持 ----
     if price_raw:
         digits = "".join(c for c in price_raw if c.isdigit())
-        if digits:
-            price = f"{int(digits):,}円"
-        else:
-            price = price_raw
+        price_value = int(digits) if digits else None
+        price = f"{price_value:,}円" if price_value is not None else price_raw
     else:
+        price_value = None
         price = "価格不明"
 
     link_tag = card.select_one(".image a")
@@ -68,6 +69,7 @@ def parse_item(card):
         "author": author,
         "image": image,
         "price": price,
+        "price_value": price_value,
         "url": url
     }
 
@@ -95,13 +97,22 @@ def get_opt_items(user_id):
 
 
 def send_batch_notification(all_new_items):
-    """Embed を複数添付してバッチ通知（空行なし・区切り線なし・価格の安い順）"""
+    """5000円以下のみ通知・Embed 色はオレンジ固定"""
 
     if not all_new_items:
         return
 
+    # ---- 5000円以下の商品だけ残す ----
+    filtered = [
+        item for item in all_new_items
+        if item["price_value"] is not None and item["price_value"] <= 5000
+    ]
+
+    if not filtered:
+        return  # 通知なし
+
     # ---- 価格の安い順にソート ----
-    all_new_items.sort(key=lambda x: int("".join(c for c in x["price"] if c.isdigit())))
+    filtered.sort(key=lambda x: x["price_value"])
 
     # --- メッセージ本文（content） ---
     if is_quiet_hours():
@@ -111,10 +122,11 @@ def send_batch_notification(all_new_items):
 
     # --- Embed を作成 ---
     embeds = []
-    for item in all_new_items:
+    for item in filtered:
         embed = {
             "title": item["title"],
             "url": item["url"],
+            "color": ORANGE,  # ← オレンジ固定
             "image": {"url": item["image"]},
             "description": (
                 f"**価格：{item['price']}**\n"
