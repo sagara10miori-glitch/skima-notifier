@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 import json
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+JST = timezone(timedelta(hours=9))
 
 WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
 
@@ -13,14 +14,14 @@ HEADERS = {
 
 
 def is_quiet_hours():
-    """0:30〜7:30 の間は True"""
-    now = datetime.now()
+    now = datetime.now(JST)
     h, m = now.hour, now.minute
 
-    if (h == 0 and m >= 30) or (1 <= h <= 6) or (h == 7 and m < 30):
-        return True
-    return False
-
+    return (
+        (h == 0 and m >= 30) or
+        (1 <= h <= 6) or
+        (h == 7 and m < 30)
+    )
 
 def fetch_html(url, retries=2, delay=2):
     for attempt in range(retries + 1):
