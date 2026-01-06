@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import json
 import os
 import time
+from datetime import datetime
 
 WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
 
@@ -10,25 +11,22 @@ HEADERS = {
     "User-Agent": "SKIMA-Notifier/1.0 (+GitHub Actions; contact: example@example.com)"
 }
 
-# 色リスト（ユーザー順で割り当て）
-COLOR_LIST = [
-    0xFF9900,  # オレンジ
-    0x66CCFF,  # 水色
-    0xCC66FF,  # 紫
-    0x33CC99,  # 緑
-    0xFF6666,  # 赤
-    0x6699FF,  # 青
-    0xFFCC33,  # 黄色
-    0xFF99CC,  # ピンク
-    0x999999,  # グレー
-    0x00CCFF,  # シアン
-]
+DIVIDER = "✦━━━━━━━━━━━━✦"
 
-CUTE_DIVIDER = "✦━━━━━━━━━━━━✦"
+
+def is_quiet_hours():
+    """0:30〜7:30 の間は True を返す"""
+    now = datetime.now()
+    h = now.hour
+    m = now.minute
+
+    # 0:30〜7:30 の判定
+    if (h == 0 and m >= 30) or (1 <= h <= 6) or (h == 7 and m < 30):
+        return True
+    return False
 
 
 def fetch_html(url, retries=2, delay=2):
-    """HTMLを取得（最大2回リトライ）"""
     for attempt in range(retries + 1):
         try:
             response = requests.get(url, headers=HEADERS, timeout=10)
@@ -36,16 +34,12 @@ def fetch_html(url, retries=2, delay=2):
                 return response.text
         except Exception:
             pass
-
         if attempt < retries:
             time.sleep(delay)
-
     return None
 
 
 def parse_item(card):
-    """商品カードから情報を抽出する"""
-
     title_tag = card.select_one(".details h5 a")
     title = title_tag.text.strip() if title_tag else "タイトル不明"
 
@@ -71,10 +65,8 @@ def parse_item(card):
 
 
 def get_opt_items(user_id):
-    """プロフィールページからDL商品を取得"""
     url = f"https://skima.jp/profile?id={user_id}"
     html = fetch_html(url)
-
     if html is None:
         return []
 
@@ -86,66 +78,59 @@ def get_opt_items(user_id):
         if not link_tag:
             continue
 
-        href = link_tag.get("href", "")
-
-        if "/dl/detail" not in href:
+        if "/dl/detail" not in link_tag.get("href", ""):
             continue
 
-        item = parse_item(card)
-        items.append(item)
+        items.append(parse_item(card))
 
     return items
 
 
-def send_discord_embed(item, color, is_first):
-    """Discord に通知を送る"""
+def send_batch_notification(all_new_items):
+    """まとめて1メッセージで通知（区切り線は間だけ）"""
 
-    # 最初の通知だけ @everyone（区切り線なし）
-    if is_first:
-        content = "@everyone"
-    else:
-        content = CUTE_DIVIDER
+    if not all_new_items:
+        return
 
-    embed = {
-        "title": item["title"],
-        "url": item["url"],
-        "image": {"url": item["image"]},
+    lines = []
 
-        "description": (
+    # 静かな時間帯なら @everyone を付けない
+    if not is_quiet_hours():
+        lines.append("@everyone")
+        lines.append("")  # 空行
+
+    for i, item in enumerate(all_new_items):
+        lines.append(
+            f"**{item['title']}**\n"
             f"**価格：{item['price']}**\n"
             f"**作者：{item['author']}**\n"
-            f"**[商品ページはこちら]({item['url']})**\n"
-        ),
+            f"**URL：{item['url']}**\n"
+        )
 
-        "color": color
-    }
+        # 最後以外は区切り線
+        if i < len(all_new_items) - 1:
+            lines.append(DIVIDER)
 
-    requests.post(WEBHOOK_URL, json={"content": content, "embeds": [embed]})
+    content = "\n".join(lines)
+
+    requests.post(WEBHOOK_URL, json={"content": content})
 
 
 def main():
-    # 前回データ読み込み
     if os.path.exists("last_data.json"):
         with open("last_data.json", "r", encoding="utf-8") as f:
             last_data = json.load(f)
     else:
         last_data = {}
 
-    # 監視ユーザー一覧
     with open("users.txt", "r", encoding="utf-8") as f:
         user_ids = [line.strip() for line in f]
 
-    # ユーザー順で色を割り当て
-    user_colors = {
-        uid: COLOR_LIST[i % len(COLOR_LIST)]
-        for i, uid in enumerate(user_ids)
-    }
-
     new_last_data = {}
-    is_first_notification = True  # ← 最初の通知だけ @everyone
+    all_new_items = []
 
     for uid in user_ids:
-        time.sleep(1)  # サーバー負荷軽減
+        time.sleep(1)
 
         items = get_opt_items(uid)
         new_last_data[uid] = items
@@ -158,10 +143,11 @@ def main():
 
         for item in items:
             if item["url"] in added_urls:
-                send_discord_embed(item, user_colors[uid], is_first_notification)
-                is_first_notification = False  # 2回目以降は @everyone を付けない
+                all_new_items.append(item)
 
-    # データ保存
+    # バッチ通知
+    send_batch_notification(all_new_items)
+
     with open("last_data.json", "w", encoding="utf-8") as f:
         json.dump(new_last_data, f, ensure_ascii=False, indent=2)
 
