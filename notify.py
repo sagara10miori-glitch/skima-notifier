@@ -7,11 +7,11 @@ import time
 WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
 
 HEADERS = {
-    "User-Agent": "SKIMA-Notifier/1.0 (+GitHub Actions; contact: your-email@example.com)"
+    "User-Agent": "SKIMA-Notifier/1.0 (+GitHub Actions; contact: example@example.com)"
 }
 
 def fetch_html(url, retries=2, delay=2):
-    """HTML取得（最大2回リトライ）"""
+    """HTMLを取得（最大2回リトライ）"""
     for attempt in range(retries + 1):
         try:
             response = requests.get(url, headers=HEADERS, timeout=10)
@@ -23,7 +23,7 @@ def fetch_html(url, retries=2, delay=2):
         if attempt < retries:
             time.sleep(delay)
 
-    return None  # 失敗したら None を返す
+    return None
 
 
 def parse_item(card):
@@ -59,7 +59,7 @@ def parse_item(card):
 
 
 def get_opt_items(user_id):
-    """プロフィールページから opt 商品を取得"""
+    """プロフィールページからDL商品を取得"""
     url = f"https://skima.jp/profile?id={user_id}"
     html = fetch_html(url)
 
@@ -69,7 +69,6 @@ def get_opt_items(user_id):
     soup = BeautifulSoup(html, "html.parser")
     items = []
 
-    # 商品カードは .inner でまとまっている
     for card in soup.select(".inner"):
         link_tag = card.select_one(".image a")
         if not link_tag:
@@ -77,7 +76,7 @@ def get_opt_items(user_id):
 
         href = link_tag.get("href", "")
 
-        # opt販売（DL商品）は /dl/detail を含む
+        # DL商品だけ取得
         if "/dl/detail" not in href:
             continue
 
@@ -87,16 +86,15 @@ def get_opt_items(user_id):
     return items
 
 
-def send_discord_embed(item, user_id):
+def send_discord_embed(item):
     """Discord に通知を送る"""
     embed = {
         "title": item["title"],
         "url": item["url"],
-        "thumbnail": {"url": item["image"]},
+        "image": {"url": item["image"]},  # ← 大きめ画像
         "fields": [
             {"name": "価格", "value": item["price"], "inline": True},
             {"name": "作者", "value": item["author"], "inline": True},
-            {"name": "ユーザーID", "value": str(user_id), "inline": True},
             {"name": "商品ページ", "value": item["url"], "inline": False}
         ],
         "color": 0xFF9900
@@ -121,8 +119,7 @@ def main():
     new_last_data = {}
 
     for uid in user_ids:
-        # サーバー負荷軽減
-        time.sleep(1)
+        time.sleep(1)  # サーバー負荷軽減
 
         items = get_opt_items(uid)
         new_last_data[uid] = items
@@ -135,7 +132,7 @@ def main():
 
         for item in items:
             if item["url"] in added_urls:
-                send_discord_embed(item, uid)
+                send_discord_embed(item)
 
     # データ保存
     with open("last_data.json", "w", encoding="utf-8") as f:
