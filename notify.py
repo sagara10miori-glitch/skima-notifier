@@ -119,7 +119,7 @@ def send_batch_notification(user_new, opt_new):
         lines.append("@everyone")
 
     if opt_new:
-        lines.append("📘 OPT販売（8000円以下）")
+        lines.append("OPT販売（8000円以下）")
 
     content = "\n".join(lines)
 
