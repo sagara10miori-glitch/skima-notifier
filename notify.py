@@ -8,11 +8,11 @@ from datetime import datetime
 WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
 
 HEADERS = {
-    "User-Agent": "SKIMA-Notifier/1.0 (+GitHub Actions; contact: example@example.com)"
+    "User-Agent": "SKIMA-Notifier/1.0 (+GitHub Actions)"
 }
 
-ORANGE = 0xFFA500  # Embed の色（オレンジ）
-OPT_URL = "https://skima.jp/dl/search?cg=60"  # opt 販売一覧
+ORANGE = 0xFFA500
+OPT_URL = "https://skima.jp/dl/search?cg=60"
 
 
 def is_quiet_hours():
@@ -29,9 +29,9 @@ def is_quiet_hours():
 def fetch_html(url, retries=2, delay=2):
     for attempt in range(retries + 1):
         try:
-            response = requests.get(url, headers=HEADERS, timeout=10)
-            if response.status_code == 200:
-                return response.text
+            r = requests.get(url, headers=HEADERS, timeout=10)
+            if r.status_code == 200:
+                return r.text
         except Exception:
             pass
         if attempt < retries:
@@ -52,7 +52,6 @@ def parse_item(card):
     price_tag = card.select_one(".price")
     price_raw = price_tag.text.strip() if price_tag else None
 
-    # ---- 価格を「◯◯円」形式に統一し、数値も保持 ----
     if price_raw:
         digits = "".join(c for c in price_raw if c.isdigit())
         price_value = int(digits) if digits else None
@@ -87,10 +86,8 @@ def get_items_from_user(user_id):
         link_tag = card.select_one(".image a")
         if not link_tag:
             continue
-
         if "/dl/detail" not in link_tag.get("href", ""):
             continue
-
         items.append(parse_item(card))
 
     return items
@@ -111,29 +108,23 @@ def get_opt_items():
 
 
 def send_batch_notification(user_new, opt_new):
-    """users.txt → タイトル → opt の順でまとめて通知"""
+    """users → タイトル → opt の順で通知（Embed 最大10個）"""
 
     if not user_new and not opt_new:
         return
 
-    # --- content の組み立て ---
     lines = []
 
-    # @everyone（静かな時間帯は外す）
     if not is_quiet_hours():
         lines.append("@everyone")
 
-    # users 新着がある場合は何も挟まない（そのまま Embed が並ぶ）
-    # opt 新着がある場合はタイトルを挿入
     if opt_new:
         lines.append("📘 OPT販売（8000円以下）")
 
     content = "\n".join(lines)
 
-    # --- Embed の作成 ---
     embeds = []
 
-    # ① users 新着（先に並べる）
     for item in user_new:
         embeds.append({
             "title": item["title"],
@@ -147,7 +138,6 @@ def send_batch_notification(user_new, opt_new):
             )
         })
 
-    # ② opt 新着（後に並べる）
     for item in opt_new:
         embeds.append({
             "title": item["title"],
@@ -161,19 +151,18 @@ def send_batch_notification(user_new, opt_new):
             )
         })
 
-    # --- Discord に送信 ---
+    embeds = embeds[:10]
+
     requests.post(WEBHOOK_URL, json={"content": content, "embeds": embeds})
 
 
 def main():
-    # --- 前回データ読み込み ---
     if os.path.exists("last_data.json"):
         with open("last_data.json", "r", encoding="utf-8") as f:
             last_data = json.load(f)
     else:
         last_data = {"users": {}, "opt": []}
 
-    # --- users.txt の巡回 ---
     with open("users.txt", "r", encoding="utf-8") as f:
         user_ids = [line.strip() for line in f]
 
@@ -190,7 +179,6 @@ def main():
             if item["url"] not in old_urls:
                 user_new_items.append(item)
 
-    # --- opt 販売の巡回 ---
     opt_items = get_opt_items()
     old_opt_urls = {item["url"] for item in last_data.get("opt", [])}
 
@@ -200,13 +188,10 @@ def main():
             if item["price_value"] is not None and item["price_value"] <= 8000:
                 opt_new_items.append(item)
 
-    # opt は価格の安い順
     opt_new_items.sort(key=lambda x: x["price_value"] or 999999)
 
-    # --- 通知 ---
     send_batch_notification(user_new_items, opt_new_items)
 
-    # --- データ保存 ---
     new_last_data = {
         "users": new_last_users,
         "opt": opt_items
