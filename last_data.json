@@ -33,6 +33,30 @@
   },
   "opt": [
     {
+      "title": "キョンシー【Adopt】",
+      "author": "白飴【10日コミッション開設予定】",
+      "image": "https://cdn-common.skima.jp/dlsample/171/288/3171288/thumbnail-61b2df3c33a55f9e63eaba05d96aa9f0-20260108062526.jpeg",
+      "price": "3,000円",
+      "price_value": 3000,
+      "url": "https://skima.jp/dl/detail?id=358603"
+    },
+    {
+      "title": "サブカルストリート【Adopt】",
+      "author": "白飴【10日コミッション開設予定】",
+      "image": "https://cdn-common.skima.jp/dlsample/171/278/3171278/thumbnail-4ff4bf1ffbdde01ff6fba835e6526f28-20260108062342.jpeg",
+      "price": "3,000円",
+      "price_value": 3000,
+      "url": "https://skima.jp/dl/detail?id=358602"
+    },
+    {
+      "title": "adopt",
+      "author": "ショカキ",
+      "image": "https://cdn-common.skima.jp/dlsample/171/269/3171269/thumbnail-27769f526cbf974481c3c19c4e7babba-20260108055503.jpeg",
+      "price": "3,000円",
+      "price_value": 3000,
+      "url": "https://skima.jp/dl/detail?id=358601"
+    },
+    {
       "title": "【表情9種、眼鏡差分】警察風スーツの女性",
       "author": "國崎ふわ",
       "image": "https://cdn-common.skima.jp/dlsample/171/258/3171258/thumbnail-d3e26b018956aa329a9ce7f65882a550-20260108054924.jpeg",
@@ -487,30 +511,6 @@
       "price": "10,000円",
       "price_value": 10000,
       "url": "https://skima.jp/dl/detail?id=358520"
-    },
-    {
-      "title": "【差分１０種】ピンク髪ハーフツインのカジュアルな女の子",
-      "author": "おこめ め子",
-      "image": "https://cdn-common.skima.jp/dlsample/170/612/3170612/thumbnail-3db3410e49f503d80598434a404da523-20260107155947.jpeg",
-      "price": "8,000円",
-      "price_value": 8000,
-      "url": "https://skima.jp/dl/detail?id=358517"
-    },
-    {
-      "title": "カエルの女の子",
-      "author": "星乃ぴか",
-      "image": "https://cdn-common.skima.jp/dlsample/170/606/3170606/thumbnail-0c3eca9490ce70433afdacbfd3b4af32-20260107154556.jpeg",
-      "price": "1,000円",
-      "price_value": 1000,
-      "url": "https://skima.jp/dl/detail?id=358516"
-    },
-    {
-      "title": "生意気ガーリー女子　立ち絵(表情差分6種)",
-      "author": "ふくち",
-      "image": "https://cdn-common.skima.jp/dlsample/170/604/3170604/thumbnail-0997b0e569172231d2f5dbb2128bb29a-20260107153704.jpeg",
-      "price": "5,000円",
-      "price_value": 5000,
-      "url": "https://skima.jp/dl/detail?id=358514"
     }
   ]
 }
