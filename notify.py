@@ -12,13 +12,13 @@ HEADERS = {
 }
 
 ORANGE = 0xFFA500  # Embed の色（オレンジ）
+OPT_URL = "https://skima.jp/dl/search?cg=60"  # opt 販売一覧
 
 
 def is_quiet_hours():
     """0:30〜7:30 の間は True"""
     now = datetime.now()
     h, m = now.hour, now.minute
-
     return (
         (h == 0 and m >= 30) or
         (1 <= h <= 6) or
@@ -74,7 +74,7 @@ def parse_item(card):
     }
 
 
-def get_opt_items(user_id):
+def get_items_from_user(user_id):
     url = f"https://skima.jp/profile?id={user_id}"
     html = fetch_html(url)
     if html is None:
@@ -96,37 +96,37 @@ def get_opt_items(user_id):
     return items
 
 
-def send_batch_notification(all_new_items):
-    """5000円以下のみ通知・Embed 色はオレンジ固定"""
+def get_opt_items():
+    html = fetch_html(OPT_URL)
+    if html is None:
+        return []
 
-    if not all_new_items:
+    soup = BeautifulSoup(html, "html.parser")
+    items = []
+
+    for card in soup.select(".inner"):
+        items.append(parse_item(card))
+
+    return items
+
+
+def send_batch_notification(user_new, opt_new):
+    """users.txt → opt の順でまとめて通知"""
+
+    all_items = user_new + opt_new
+    if not all_items:
         return
 
-    # ---- 5000円以下の商品だけ残す ----
-    filtered = [
-        item for item in all_new_items
-        if item["price_value"] is not None and item["price_value"] <= 5000
-    ]
-
-    if not filtered:
-        return  # 通知なし
-
-    # ---- 価格の安い順にソート ----
-    filtered.sort(key=lambda x: x["price_value"])
-
     # --- メッセージ本文（content） ---
-    if is_quiet_hours():
-        content = ""  # 静かな時間帯は @everyone なし
-    else:
-        content = "@everyone"
+    content = "" if is_quiet_hours() else "@everyone"
 
     # --- Embed を作成 ---
     embeds = []
-    for item in filtered:
+    for item in all_items:
         embed = {
             "title": item["title"],
             "url": item["url"],
-            "color": ORANGE,  # ← オレンジ固定
+            "color": ORANGE,
             "image": {"url": item["image"]},
             "description": (
                 f"**価格：{item['price']}**\n"
@@ -136,41 +136,55 @@ def send_batch_notification(all_new_items):
         }
         embeds.append(embed)
 
-    # --- Discord に送信 ---
     requests.post(WEBHOOK_URL, json={"content": content, "embeds": embeds})
 
 
 def main():
+    # --- 前回データ読み込み ---
     if os.path.exists("last_data.json"):
         with open("last_data.json", "r", encoding="utf-8") as f:
             last_data = json.load(f)
     else:
-        last_data = {}
+        last_data = {"users": {}, "opt": []}
 
+    # --- users.txt の巡回 ---
     with open("users.txt", "r", encoding="utf-8") as f:
         user_ids = [line.strip() for line in f]
 
-    new_last_data = {}
-    all_new_items = []
+    new_last_users = {}
+    user_new_items = []
 
     for uid in user_ids:
         time.sleep(1)
+        items = get_items_from_user(uid)
+        new_last_users[uid] = items
 
-        items = get_opt_items(uid)
-        new_last_data[uid] = items
-
-        old_items = last_data.get(uid, [])
-        old_urls = {item["url"] for item in old_items}
-        new_urls = {item["url"] for item in items}
-
-        added_urls = new_urls - old_urls
-
+        old_urls = {item["url"] for item in last_data.get("users", {}).get(uid, [])}
         for item in items:
-            if item["url"] in added_urls:
-                all_new_items.append(item)
+            if item["url"] not in old_urls:
+                user_new_items.append(item)
 
-    # バッチ通知（Embed）
-    send_batch_notification(all_new_items)
+    # --- opt 販売の巡回 ---
+    opt_items = get_opt_items()
+    old_opt_urls = {item["url"] for item in last_data.get("opt", [])}
+
+    opt_new_items = []
+    for item in opt_items:
+        if item["url"] not in old_opt_urls:
+            if item["price_value"] is not None and item["price_value"] <= 8000:
+                opt_new_items.append(item)
+
+    # opt は価格の安い順
+    opt_new_items.sort(key=lambda x: x["price_value"] or 999999)
+
+    # --- 通知 ---
+    send_batch_notification(user_new_items, opt_new_items)
+
+    # --- データ保存 ---
+    new_last_data = {
+        "users": new_last_users,
+        "opt": opt_items
+    }
 
     with open("last_data.json", "w", encoding="utf-8") as f:
         json.dump(new_last_data, f, ensure_ascii=False, indent=2)
