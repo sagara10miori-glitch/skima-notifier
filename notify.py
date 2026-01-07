@@ -111,19 +111,31 @@ def get_opt_items():
 
 
 def send_batch_notification(user_new, opt_new):
-    """users.txt → opt の順でまとめて通知"""
+    """users.txt → タイトル → opt の順でまとめて通知"""
 
-    all_items = user_new + opt_new
-    if not all_items:
+    if not user_new and not opt_new:
         return
 
-    # --- メッセージ本文（content） ---
-    content = "" if is_quiet_hours() else "@everyone"
+    # --- content の組み立て ---
+    lines = []
 
-    # --- Embed を作成 ---
+    # @everyone（静かな時間帯は外す）
+    if not is_quiet_hours():
+        lines.append("@everyone")
+
+    # users 新着がある場合は何も挟まない（そのまま Embed が並ぶ）
+    # opt 新着がある場合はタイトルを挿入
+    if opt_new:
+        lines.append("📘 OPT販売（8000円以下）")
+
+    content = "\n".join(lines)
+
+    # --- Embed の作成 ---
     embeds = []
-    for item in all_items:
-        embed = {
+
+    # ① users 新着（先に並べる）
+    for item in user_new:
+        embeds.append({
             "title": item["title"],
             "url": item["url"],
             "color": ORANGE,
@@ -133,9 +145,23 @@ def send_batch_notification(user_new, opt_new):
                 f"**作者：{item['author']}**\n"
                 f"**[商品ページはこちら]({item['url']})**"
             )
-        }
-        embeds.append(embed)
+        })
 
+    # ② opt 新着（後に並べる）
+    for item in opt_new:
+        embeds.append({
+            "title": item["title"],
+            "url": item["url"],
+            "color": ORANGE,
+            "image": {"url": item["image"]},
+            "description": (
+                f"**価格：{item['price']}**\n"
+                f"**作者：{item['author']}**\n"
+                f"**[商品ページはこちら]({item['url']})**"
+            )
+        })
+
+    # --- Discord に送信 ---
     requests.post(WEBHOOK_URL, json={"content": content, "embeds": embeds})
 
 
