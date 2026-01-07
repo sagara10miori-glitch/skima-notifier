@@ -116,18 +116,18 @@ def send_batch_notification(user_new, opt_new):
     if not user_new and not opt_new:
         return
 
-    lines = []
-
-    if not is_quiet_hours():
-        lines.append("@everyone")
-
-    if opt_new:
-        lines.append("OPT販売（8000円以下）")
-
-    content = "\n".join(lines)
+    # --- 深夜帯は content を完全に空にする ---
+    if is_quiet_hours():
+        content = ""
+    else:
+        lines = ["@everyone"]
+        if opt_new:
+            lines.append("OPT販売（8000円以下）")
+        content = "\n".join(lines)
 
     embeds = []
 
+    # users 新着（先）
     for item in user_new:
         embeds.append({
             "title": item["title"],
@@ -141,6 +141,7 @@ def send_batch_notification(user_new, opt_new):
             )
         })
 
+    # opt 新着（後）
     for item in opt_new:
         embeds.append({
             "title": item["title"],
@@ -154,6 +155,7 @@ def send_batch_notification(user_new, opt_new):
             )
         })
 
+    # Embed は最大10件
     embeds = embeds[:10]
 
     requests.post(WEBHOOK_URL, json={"content": content, "embeds": embeds})
