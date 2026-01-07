@@ -89,14 +89,6 @@
       "url": "https://skima.jp/dl/detail?id=358599"
     },
     {
-      "title": "桃色チャイナっ子【表情10種】",
-      "author": "ぜろた",
-      "image": "https://cdn-common.skima.jp/dlsample/171/238/3171238/thumbnail-3d10d9c0cd7546ab3a2d5db6af9c181c-20260108040241.jpeg",
-      "price": "12,000円",
-      "price_value": 12000,
-      "url": "https://skima.jp/dl/detail?id=358598"
-    },
-    {
       "title": "アリス風の女の子(表情10種)",
       "author": "yukino",
       "image": "https://cdn-common.skima.jp/dlsample/171/225/3171225/thumbnail-ab34c1aeb0157993ed756bd08286af5f-20260108021332.jpeg",
@@ -511,6 +503,14 @@
       "price": "10,000円",
       "price_value": 10000,
       "url": "https://skima.jp/dl/detail?id=358522"
+    },
+    {
+      "title": "【表情10種】adopt",
+      "author": "エンドルフィン",
+      "image": "https://cdn-common.skima.jp/dlsample/170/658/3170658/thumbnail-f885bfc3005f954e1283d9e532e68436-20260107162101.jpeg",
+      "price": "10,000円",
+      "price_value": 10000,
+      "url": "https://skima.jp/dl/detail?id=358521"
     }
   ]
 }
