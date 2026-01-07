@@ -33,6 +33,22 @@
   },
   "opt": [
     {
+      "title": "アリス風の女の子(表情10種)",
+      "author": "yukino",
+      "image": "https://cdn-common.skima.jp/dlsample/171/225/3171225/thumbnail-ab34c1aeb0157993ed756bd08286af5f-20260108021332.jpeg",
+      "price": "2,000円",
+      "price_value": 2000,
+      "url": "https://skima.jp/dl/detail?id=358597"
+    },
+    {
+      "title": "【表情9種＋SDキャラ付き】小悪魔の女の子",
+      "author": "みんみん",
+      "image": "https://cdn-common.skima.jp/dlsample/171/216/3171216/thumbnail-a05d4ba94cfa2ad9e31f8bcf1a17b338-20260108021159.jpeg",
+      "price": "8,000円",
+      "price_value": 8000,
+      "url": "https://skima.jp/dl/detail?id=358596"
+    },
+    {
       "title": "天使の男の子【表情9種＋SD】",
       "author": "みんみん",
       "image": "https://cdn-common.skima.jp/dlsample/171/205/3171205/thumbnail-021a6b0cbbf9c5e3c76bd783b64ccba6-20260108015257.jpeg",
@@ -55,14 +71,6 @@
       "price": "1,500円",
       "price_value": 1500,
       "url": "https://skima.jp/dl/detail?id=358593"
-    },
-    {
-      "title": "アリス風の女の子(表情10種)",
-      "author": "yukino",
-      "image": "https://cdn-common.skima.jp/dlsample/171/188/3171188/thumbnail-e3742f3712f6bbfb15535cfc47cd09aa-20260108004914.jpeg",
-      "price": "2,000円",
-      "price_value": 2000,
-      "url": "https://skima.jp/dl/detail?id=358592"
     },
     {
       "title": "[SALE]カジュアルな研究員風男性（1/10頃まで）",
@@ -503,14 +511,6 @@
       "price": "9,500円",
       "price_value": 9500,
       "url": "https://skima.jp/dl/detail?id=358511"
-    },
-    {
-      "title": "ロングヘアのシスター",
-      "author": "みる",
-      "image": "https://cdn-common.skima.jp/dlsample/170/565/3170565/thumbnail-525f78f02add6e2dde29541e3ff1dab0-20260107141915.jpeg",
-      "price": "10,000円",
-      "price_value": 10000,
-      "url": "https://skima.jp/dl/detail?id=358510"
     }
   ]
 }
