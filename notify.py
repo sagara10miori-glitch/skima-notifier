@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import json
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
 
@@ -14,10 +14,13 @@ HEADERS = {
 ORANGE = 0xFFA500
 OPT_URL = "https://skima.jp/dl/search?cg=60"
 
+# JST 固定
+JST = timezone(timedelta(hours=9))
+
 
 def is_quiet_hours():
-    """0:30〜7:30 の間は True"""
-    now = datetime.now()
+    """JST 0:30〜7:30 を深夜帯として扱う"""
+    now = datetime.now(JST)
     h, m = now.hour, now.minute
     return (
         (h == 0 and m >= 30) or
@@ -108,7 +111,7 @@ def get_opt_items():
 
 
 def send_batch_notification(user_new, opt_new):
-    """users → タイトル → opt の順で通知（Embed 最大10個）"""
+    """users → タイトル → opt の順で通知（Embed 最大10件）"""
 
     if not user_new and not opt_new:
         return
