@@ -45,6 +45,14 @@
   },
   "opt": [
     {
+      "title": "ドール少女",
+      "author": "ゆき",
+      "image": "https://cdn-common.skima.jp/dlsample/172/309/3172309/thumbnail-2193f8f989a4098837a26bfe204adc73-20260109051944.jpeg",
+      "price": "5,500円",
+      "price_value": 5500,
+      "url": "https://skima.jp/dl/detail?id=358733"
+    },
+    {
       "title": "【おろし髪立ち絵付き】ツインテールサイズっ娘",
       "author": "たんさん。",
       "image": "https://cdn-common.skima.jp/dlsample/172/299/3172299/thumbnail-038416e6100f9e08b6f30f62ad472c0c-20260109041217.jpeg",
@@ -515,14 +523,6 @@
       "price": "3,000円",
       "price_value": 3000,
       "url": "https://skima.jp/dl/detail?id=358660"
-    },
-    {
-      "title": "スーツの男性【表情5種】",
-      "author": "high",
-      "image": "https://cdn-common.skima.jp/dlsample/171/716/3171716/thumbnail-c02a0f9d5a7723eaeac108e2b73aa847-20260108174906.jpeg",
-      "price": "2,500円",
-      "price_value": 2500,
-      "url": "https://skima.jp/dl/detail?id=358659"
     }
   ]
 }
