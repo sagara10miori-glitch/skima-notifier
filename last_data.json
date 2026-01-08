@@ -33,6 +33,22 @@
   },
   "opt": [
     {
+      "title": "褐色武器持ちシスター",
+      "author": "ゆー",
+      "image": "https://cdn-common.skima.jp/dlsample/171/527/3171527/thumbnail-27b7f556140ca3a572199b566218037d-20260108143745.jpeg",
+      "price": "52,000円",
+      "price_value": 52000,
+      "url": "https://skima.jp/dl/detail?id=358637"
+    },
+    {
+      "title": "エルフ 白髪 長剣 (表情8種)",
+      "author": "yagi",
+      "image": "https://cdn-common.skima.jp/dlsample/171/507/3171507/thumbnail-d278e61ad948a25810faafa3f2f60acc-20260108142215.jpeg",
+      "price": "15,000円",
+      "price_value": 15000,
+      "url": "https://skima.jp/dl/detail?id=358633"
+    },
+    {
       "title": "ボウガン使い【表情10種】",
       "author": "コゲ風味",
       "image": "https://cdn-common.skima.jp/dlsample/171/493/3171493/thumbnail-1b55f568d2572881de7849c450240841-20260108134305.jpeg",
@@ -199,14 +215,6 @@
       "price": "5,000円",
       "price_value": 5000,
       "url": "https://skima.jp/dl/detail?id=358605"
-    },
-    {
-      "title": "キョンシー【Adopt】",
-      "author": "白飴【10日コミッション開設予定】",
-      "image": "https://cdn-common.skima.jp/dlsample/171/288/3171288/thumbnail-61b2df3c33a55f9e63eaba05d96aa9f0-20260108062526.jpeg",
-      "price": "3,000円",
-      "price_value": 3000,
-      "url": "https://skima.jp/dl/detail?id=358603"
     },
     {
       "title": "サブカルストリート【Adopt】",
@@ -503,14 +511,6 @@
       "price": "9,000円",
       "price_value": 9000,
       "url": "https://skima.jp/dl/detail?id=358545"
-    },
-    {
-      "title": "【表情差分7種】スーツの男性",
-      "author": "米野つぶ",
-      "image": "https://cdn-common.skima.jp/dlsample/170/857/3170857/thumbnail-72646eea32cfb2f2ec70d8357374e5ec-20260107185803.jpeg",
-      "price": "5,000円",
-      "price_value": 5000,
-      "url": "https://skima.jp/dl/detail?id=358544"
     }
   ]
 }
