@@ -41,6 +41,14 @@
   },
   "opt": [
     {
+      "title": "Adopt【表情5種】🥚🧡",
+      "author": "こいぬ",
+      "image": "https://cdn-common.skima.jp/dlsample/171/620/3171620/thumbnail-7034262ec2c627458c1ad5ece331f3cf-20260108164802.jpeg",
+      "price": "4,000円",
+      "price_value": 4000,
+      "url": "https://skima.jp/dl/detail?id=358651"
+    },
+    {
       "title": "コートの男性【表情差分7種】",
       "author": "米野つぶ",
       "image": "https://cdn-common.skima.jp/dlsample/171/610/3171610/thumbnail-9a1a05789b727c4b26d27934d2f0de86-20260108163804.jpeg",
@@ -511,14 +519,6 @@
       "price": "9,000円",
       "price_value": 9000,
       "url": "https://skima.jp/dl/detail?id=358562"
-    },
-    {
-      "title": "【表情差分8種】opus.81",
-      "author": "Rei",
-      "image": "https://cdn-common.skima.jp/dlsample/170/965/3170965/thumbnail-467221d216a1f2196668525cdcc2dd25-20260107195221.jpeg",
-      "price": "16,000円",
-      "price_value": 16000,
-      "url": "https://skima.jp/dl/detail?id=358561"
     }
   ]
 }
