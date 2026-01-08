@@ -41,6 +41,22 @@
   },
   "opt": [
     {
+      "title": "銀髪の少年【表情10種】",
+      "author": "田中",
+      "image": "https://cdn-common.skima.jp/dlsample/172/209/3172209/thumbnail-c7f16054aca2a084fd7367e6efd1d5df-20260108231612.jpeg",
+      "price": "3,000円",
+      "price_value": 3000,
+      "url": "https://skima.jp/dl/detail?id=358719"
+    },
+    {
+      "title": "【差分10種】ハイトーンマッシュウルフのお兄さん",
+      "author": "おこめ め子",
+      "image": "https://cdn-common.skima.jp/dlsample/172/197/3172197/thumbnail-a0cff527b287a1a971cae71c3cf69b34-20260108230107.jpeg",
+      "price": "8,000円",
+      "price_value": 8000,
+      "url": "https://skima.jp/dl/detail?id=358717"
+    },
+    {
       "title": "スライム娘【表情8種】",
       "author": "SUMI",
       "image": "https://cdn-common.skima.jp/dlsample/172/175/3172175/thumbnail-ecbc4dfaefe3745569c609adf8c11a58-20260108223712.jpeg",
@@ -503,22 +519,6 @@
       "price": "3,500円",
       "price_value": 3500,
       "url": "https://skima.jp/dl/detail?id=358642"
-    },
-    {
-      "title": "【adopt】サブカル系の女性",
-      "author": "紺田",
-      "image": "https://cdn-common.skima.jp/dlsample/171/550/3171550/thumbnail-9fbe5cf6506eb66e79996dc21136a03a-20260108152114.jpeg",
-      "price": "28,000円",
-      "price_value": 28000,
-      "url": "https://skima.jp/dl/detail?id=358640"
-    },
-    {
-      "title": "【adopt】和服／私服の男性",
-      "author": "紺田",
-      "image": "https://cdn-common.skima.jp/dlsample/171/546/3171546/thumbnail-6c2351440d122def2565d9882c2c28d1-20260108151627.jpeg",
-      "price": "27,000円",
-      "price_value": 27000,
-      "url": "https://skima.jp/dl/detail?id=358639"
     }
   ]
 }
