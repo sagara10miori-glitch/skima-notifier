@@ -3,10 +3,18 @@ name: SKIMA Notifier
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"
+    # JST 6:00〜23:55 → 5分ごと（UTC 21:00〜14:55）
+    - cron: "*/5 21-23 * * *"
+    - cron: "*/5 0-14 * * *"
+
+    # JST 0:00〜1:55 → 5分ごと（UTC 15:00〜16:55）
+    - cron: "*/5 15-16 * * *"
+
+    # JST 2:00〜5:30 → 30分ごと（UTC 17:00〜20:30）
+    - cron: "0,30 17-20 * * *"
 
 permissions:
-  contents: write  # last_data.json を push するために必要
+  contents: write
 
 jobs:
   run-notifier:
