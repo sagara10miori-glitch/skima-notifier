@@ -33,6 +33,22 @@
   },
   "opt": [
     {
+      "title": "ボウガン使い【表情10種】",
+      "author": "コゲ風味",
+      "image": "https://cdn-common.skima.jp/dlsample/171/493/3171493/thumbnail-1b55f568d2572881de7849c450240841-20260108134305.jpeg",
+      "price": "8,600円",
+      "price_value": 8600,
+      "url": "https://skima.jp/dl/detail?id=358630"
+    },
+    {
+      "title": "狐の魔物【表情3種類】",
+      "author": "クロウミ",
+      "image": "https://cdn-common.skima.jp/dlsample/171/486/3171486/thumbnail-f8787a84ed731c5331acf82b229cd7c6-20260108131448.jpeg",
+      "price": "3,000円",
+      "price_value": 3000,
+      "url": "https://skima.jp/dl/detail?id=358626"
+    },
+    {
       "title": "雪柄和服の子",
       "author": "ぷち",
       "image": "https://cdn-common.skima.jp/dlsample/171/475/3171475/thumbnail-74de710a7a2a0914fea0fe1823e01b8f-20260108125302.jpeg",
@@ -495,22 +511,6 @@
       "price": "5,000円",
       "price_value": 5000,
       "url": "https://skima.jp/dl/detail?id=358544"
-    },
-    {
-      "title": "【表情10種】物静かな雰囲気の冒険者少女",
-      "author": "RUKA",
-      "image": "https://cdn-common.skima.jp/dlsample/170/838/3170838/thumbnail-8f8deb442ebc1098de7672f034eb3eaa-20260107183538.jpeg",
-      "price": "10,000円",
-      "price_value": 10000,
-      "url": "https://skima.jp/dl/detail?id=358542"
-    },
-    {
-      "title": "簡単立ち絵2【表情5種】",
-      "author": "白滝カレー(BBQ)",
-      "image": "https://cdn-common.skima.jp/dlsample/170/827/3170827/thumbnail-d9c4508ad9924644e32a47b184132245-20260107183411.jpeg",
-      "price": "5,000円",
-      "price_value": 5000,
-      "url": "https://skima.jp/dl/detail?id=358541"
     }
   ]
 }
