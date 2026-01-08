@@ -91,44 +91,29 @@ def get_items_from_user(user_id):
             continue
         if "/dl/detail" not in link_tag.get("href", ""):
             continue
-        items.append(parse_item(card))
+
+        item = parse_item(card)
+        item["user_id"] = user_id
+        items.append(item)
 
     return items
 
 
-def get_opt_items():
-    html = fetch_html(OPT_URL)
-    if html is None:
-        return []
+def send_notification(title, items, allow_everyone):
+    """単独通知を送る（優先通知 or opt通知）"""
 
-    soup = BeautifulSoup(html, "html.parser")
-    items = []
-
-    for card in soup.select(".inner"):
-        items.append(parse_item(card))
-
-    return items
-
-
-def send_batch_notification(user_new, opt_new):
-    """users → タイトル → opt の順で通知（Embed 最大10件）"""
-
-    if not user_new and not opt_new:
+    if not items:
         return
 
-    # --- 深夜帯は content を完全に空にする ---
-    if is_quiet_hours():
-        content = ""
+    # @everyone の判定
+    if allow_everyone and not is_quiet_hours():
+        content = f"@everyone\n{title}"
     else:
-        lines = ["@everyone"]
-        if opt_new:
-            lines.append("OPT販売（8000円以下）")
-        content = "\n".join(lines)
+        content = title
 
     embeds = []
 
-    # users 新着（先）
-    for item in user_new:
+    for item in items:
         embeds.append({
             "title": item["title"],
             "url": item["url"],
@@ -141,39 +126,27 @@ def send_batch_notification(user_new, opt_new):
             )
         })
 
-    # opt 新着（後）
-    for item in opt_new:
-        embeds.append({
-            "title": item["title"],
-            "url": item["url"],
-            "color": ORANGE,
-            "image": {"url": item["image"]},
-            "description": (
-                f"**価格：{item['price']}**\n"
-                f"**作者：{item['author']}**\n"
-                f"**[商品ページはこちら]({item['url']})**"
-            )
-        })
-
-    # Embed は最大10件
     embeds = embeds[:10]
 
     requests.post(WEBHOOK_URL, json={"content": content, "embeds": embeds})
 
 
 def main():
+    # last_data.json 読み込み
     if os.path.exists("last_data.json"):
         with open("last_data.json", "r", encoding="utf-8") as f:
             last_data = json.load(f)
     else:
         last_data = {"users": {}, "opt": []}
 
+    # users.txt 読み込み（全員が優先ユーザー）
     with open("users.txt", "r", encoding="utf-8") as f:
         user_ids = [line.strip() for line in f]
 
     new_last_users = {}
-    user_new_items = []
+    priority_items = []  # users.txt 全員の新着
 
+    # --- 優先ユーザー（users.txt 全員） ---
     for uid in user_ids:
         time.sleep(1)
         items = get_items_from_user(uid)
@@ -182,12 +155,21 @@ def main():
         old_urls = {item["url"] for item in last_data.get("users", {}).get(uid, [])}
         for item in items:
             if item["url"] not in old_urls:
-                user_new_items.append(item)
+                priority_items.append(item)
 
-    opt_items = get_opt_items()
+    # --- OPT 新着 ---
+    html = fetch_html(OPT_URL)
+    opt_items = []
+    opt_new_items = []
+
+    if html:
+        soup = BeautifulSoup(html, "html.parser")
+        for card in soup.select(".inner"):
+            item = parse_item(card)
+            opt_items.append(item)
+
     old_opt_urls = {item["url"] for item in last_data.get("opt", [])}
 
-    opt_new_items = []
     for item in opt_items:
         if item["url"] not in old_opt_urls:
             if item["price_value"] is not None and item["price_value"] <= 8000:
@@ -195,8 +177,15 @@ def main():
 
     opt_new_items.sort(key=lambda x: x["price_value"] or 999999)
 
-    send_batch_notification(user_new_items, opt_new_items)
+    # --- 通知送信 ---
+    # ① 優先通知（@everyone あり）
+    send_notification("優先通知", priority_items, allow_everyone=True)
 
+    # ② opt通知（優先通知が無い場合のみ @everyone）
+    allow_everyone_for_opt = (len(priority_items) == 0)
+    send_notification("opt通知", opt_new_items, allow_everyone=allow_everyone_for_opt)
+
+    # --- last_data.json 更新 ---
     new_last_data = {
         "users": new_last_users,
         "opt": opt_items
