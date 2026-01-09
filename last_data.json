@@ -63,6 +63,22 @@
   },
   "opt": [
     {
+      "title": "和風男性",
+      "author": "FD",
+      "image": "https://cdn-common.skima.jp/dlsample/173/365/3173365/thumbnail-f17fe29427a232be96ed9eece721385c-20260110053534.jpeg",
+      "price": "3,500円",
+      "price_value": 3500,
+      "url": "https://skima.jp/dl/detail?id=358850"
+    },
+    {
+      "title": "【表情9種、眼鏡差分】スーツの女性",
+      "author": "國崎ふわ",
+      "image": "https://cdn-common.skima.jp/dlsample/173/354/3173354/thumbnail-e9e4e9a0c37e914239c44e9960ebb2bc-20260110052210.jpeg",
+      "price": "3,000円",
+      "price_value": 3000,
+      "url": "https://skima.jp/dl/detail?id=358849"
+    },
+    {
       "title": "黒髪の男性【表情6種】",
       "author": "reimei",
       "image": "https://cdn-common.skima.jp/dlsample/173/347/3173347/thumbnail-ba9417fc260900caf0299624b70e4b8e-20260110022425.jpeg",
@@ -525,22 +541,6 @@
       "price": "3,000円",
       "price_value": 3000,
       "url": "https://skima.jp/dl/detail?id=358780"
-    },
-    {
-      "title": "眼帯【Adopt】",
-      "author": "白飴【10日コミッション開設予定】",
-      "image": "https://cdn-common.skima.jp/dlsample/172/739/3172739/thumbnail-17f22339de5c3f6f4b4eb41a471557ec-20260109181639.jpeg",
-      "price": "3,000円",
-      "price_value": 3000,
-      "url": "https://skima.jp/dl/detail?id=358779"
-    },
-    {
-      "title": "Adopt30　ブルーサイバーガール",
-      "author": "小西木",
-      "image": "https://cdn-common.skima.jp/dlsample/172/728/3172728/thumbnail-5767a77e3ca409c468716e3ba134b9e9-20260109181526.jpeg",
-      "price": "7,500円",
-      "price_value": 7500,
-      "url": "https://skima.jp/dl/detail?id=358778"
     }
   ]
 }
