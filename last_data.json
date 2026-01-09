@@ -45,6 +45,22 @@
   },
   "opt": [
     {
+      "title": "中性的な洋風の男の子",
+      "author": "じうむ",
+      "image": "https://cdn-common.skima.jp/dlsample/172/470/3172470/thumbnail-9025ae01d9ffc09dd08241381a5a11ce-20260109134150.jpeg",
+      "price": "6,500円",
+      "price_value": 6500,
+      "url": "https://skima.jp/dl/detail?id=358751"
+    },
+    {
+      "title": "ファンタジー 錬金術師 エルフ",
+      "author": "ゆ。",
+      "image": "https://cdn-common.skima.jp/dlsample/172/461/3172461/thumbnail-5f8e93775ae4f0d04840ff3fb3c93656-20260109131614.jpeg",
+      "price": "11,600円",
+      "price_value": 11600,
+      "url": "https://skima.jp/dl/detail?id=358750"
+    },
+    {
       "title": "Adopt_03　alice",
       "author": "でじるみ茨城水戸",
       "image": "https://cdn-common.skima.jp/dlsample/172/427/3172427/thumbnail-d02367957d8dd338815a76c1ad35fa5b-20260109114440.jpeg",
@@ -507,22 +523,6 @@
       "price": "3,000円",
       "price_value": 3000,
       "url": "https://skima.jp/dl/detail?id=358675"
-    },
-    {
-      "title": "ふわふわ茶髪のピンクナース",
-      "author": "飴野うさぎ",
-      "image": "https://cdn-common.skima.jp/dlsample/171/839/3171839/thumbnail-c299a65cd77c745ae80d35453c479a5f-20260108194156.jpeg",
-      "price": "3,000円",
-      "price_value": 3000,
-      "url": "https://skima.jp/dl/detail?id=358674"
-    },
-    {
-      "title": "ピンクの三つ編み【adopt】",
-      "author": "トゥリちゃん",
-      "image": "https://cdn-common.skima.jp/dlsample/171/807/3171807/thumbnail-16bf2df7e497dbb3f1fb25f01cca42ac-20260108185252.jpeg",
-      "price": "15,000円",
-      "price_value": 15000,
-      "url": "https://skima.jp/dl/detail?id=358672"
     }
   ]
 }
