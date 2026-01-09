@@ -54,6 +54,14 @@
   },
   "opt": [
     {
+      "title": "炎属性ケモ【表情9種類】",
+      "author": "クロウミ",
+      "image": "https://cdn-common.skima.jp/dlsample/172/845/3172845/thumbnail-fd756f8c450c69808e6ac38b4031083d-20260109195734.jpeg",
+      "price": "4,000円",
+      "price_value": 4000,
+      "url": "https://skima.jp/dl/detail?id=358790"
+    },
+    {
       "title": "金髪のカウガール",
       "author": "Meer",
       "image": "https://cdn-common.skima.jp/dlsample/172/836/3172836/thumbnail-a617fbd9e0ac78e7dc1ec09a04510266-20260109194621.jpeg",
@@ -524,14 +532,6 @@
       "price": "8,000円",
       "price_value": 8000,
       "url": "https://skima.jp/dl/detail?id=358717"
-    },
-    {
-      "title": "スライム娘【表情8種】",
-      "author": "SUMI",
-      "image": "https://cdn-common.skima.jp/dlsample/172/175/3172175/thumbnail-ecbc4dfaefe3745569c609adf8c11a58-20260108223712.jpeg",
-      "price": "7,000円",
-      "price_value": 7000,
-      "url": "https://skima.jp/dl/detail?id=358713"
     }
   ]
 }
