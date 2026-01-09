@@ -54,8 +54,56 @@
   },
   "opt": [
     {
+      "title": "金髪のカウガール",
+      "author": "Meer",
+      "image": "https://cdn-common.skima.jp/dlsample/172/836/3172836/thumbnail-a617fbd9e0ac78e7dc1ec09a04510266-20260109194621.jpeg",
+      "price": "4,000円",
+      "price_value": 4000,
+      "url": "https://skima.jp/dl/detail?id=358789"
+    },
+    {
+      "title": "【立ち絵】コート/男性キャラ【表情9種】",
+      "author": "たちばな【2月以降】",
+      "image": "https://cdn-common.skima.jp/dlsample/172/826/3172826/thumbnail-7a50f680c273ba6708848f4931209310-20260109193941.jpeg",
+      "price": "12,000円",
+      "price_value": 12000,
+      "url": "https://skima.jp/dl/detail?id=358788"
+    },
+    {
+      "title": "タクティカル ライフル (表情8種)",
+      "author": "yagi",
+      "image": "https://cdn-common.skima.jp/dlsample/172/809/3172809/thumbnail-f9cfd5fb562a3dceb9bce629a6186c65-20260109190239.jpeg",
+      "price": "15,000円",
+      "price_value": 15000,
+      "url": "https://skima.jp/dl/detail?id=358787"
+    },
+    {
+      "title": "【表情差分7種+蛸足・血糊】adopt",
+      "author": "白墨",
+      "image": "https://cdn-common.skima.jp/dlsample/172/805/3172805/thumbnail-63c284caea5ba0b8b1b34dcc4b290cb8-20260109190207.jpeg",
+      "price": "8,600円",
+      "price_value": 8600,
+      "url": "https://skima.jp/dl/detail?id=358786"
+    },
+    {
+      "title": "【表情５種】戦闘服・女性",
+      "author": "玄(ｸﾛ)",
+      "image": "https://cdn-common.skima.jp/dlsample/172/795/3172795/thumbnail-ad168d1ca3d7e76f679d11424374d2b6-20260109185618.jpeg",
+      "price": "6,500円",
+      "price_value": 6500,
+      "url": "https://skima.jp/dl/detail?id=358785"
+    },
+    {
+      "title": "【表情差分7種 】オオカミモチーフの女の子",
+      "author": "ことばヅカイ",
+      "image": "https://cdn-common.skima.jp/dlsample/172/788/3172788/thumbnail-30c3367bcccae30e1cae69e381a4628f-20260109185543.jpeg",
+      "price": "7,000円",
+      "price_value": 7000,
+      "url": "https://skima.jp/dl/detail?id=358784"
+    },
+    {
       "title": "【表情差分8種 】うさぎモチーフの女の子",
-      "author": "ことばヅカイ（シエツ）",
+      "author": "ことばヅカイ",
       "image": "https://cdn-common.skima.jp/dlsample/172/778/3172778/thumbnail-e40a976c21473d636b3aa5b248fd7221-20260109185133.jpeg",
       "price": "7,000円",
       "price_value": 7000,
@@ -484,54 +532,6 @@
       "price": "7,000円",
       "price_value": 7000,
       "url": "https://skima.jp/dl/detail?id=358713"
-    },
-    {
-      "title": "天使 (表情8種)",
-      "author": "yagi",
-      "image": "https://cdn-common.skima.jp/dlsample/172/165/3172165/thumbnail-9f4b0a4ea04391c4ade0855c4a1ee64e-20260108222705.jpeg",
-      "price": "15,000円",
-      "price_value": 15000,
-      "url": "https://skima.jp/dl/detail?id=358712"
-    },
-    {
-      "title": "サイドテールの女の子　adopt 表情8種",
-      "author": "楼月リョウ",
-      "image": "https://cdn-common.skima.jp/dlsample/172/164/3172164/thumbnail-f1ade06035b700587d274675d163a197-20260108221854.jpeg",
-      "price": "4,000円",
-      "price_value": 4000,
-      "url": "https://skima.jp/dl/detail?id=358711"
-    },
-    {
-      "title": "尻尾が生えた白シスター",
-      "author": "みる",
-      "image": "https://cdn-common.skima.jp/dlsample/172/143/3172143/thumbnail-36fc405b879bfa838aa24ddad74d807e-20260108215638.jpeg",
-      "price": "10,000円",
-      "price_value": 10000,
-      "url": "https://skima.jp/dl/detail?id=358709"
-    },
-    {
-      "title": "【表情差分7種】けもみみちゃん",
-      "author": "黒灯火",
-      "image": "https://cdn-common.skima.jp/dlsample/506/212/2506212/thumbnail-d9cd3e5ce4047f44aab428e2e5e13c63-20241020235610.jpeg",
-      "price": "10,000円",
-      "price_value": 10000,
-      "url": "https://skima.jp/dl/detail?id=284639"
-    },
-    {
-      "title": "【表情7種】カーキ色の男の子",
-      "author": "おとねこ",
-      "image": "https://cdn-common.skima.jp/dlsample/172/135/3172135/thumbnail-299fbb6e88e13cece04a83004464a448-20260108215207.jpeg",
-      "price": "4,000円",
-      "price_value": 4000,
-      "url": "https://skima.jp/dl/detail?id=358708"
-    },
-    {
-      "title": "カジュアルな男性立ち絵　表情8種",
-      "author": "岡喜まひろ",
-      "image": "https://cdn-common.skima.jp/dlsample/172/111/3172111/thumbnail-50eb43e9575b9124bd214f504e1d593d-20260108213320.jpeg",
-      "price": "7,800円",
-      "price_value": 7800,
-      "url": "https://skima.jp/dl/detail?id=358705"
     }
   ]
 }
