@@ -54,6 +54,22 @@
   },
   "opt": [
     {
+      "title": "adopt【表情８種】",
+      "author": "まるゆ",
+      "image": "https://cdn-common.skima.jp/dlsample/172/887/3172887/thumbnail-be8d00f133522b825b6bee3d0c85770e-20260109204557.jpeg",
+      "price": "7,000円",
+      "price_value": 7000,
+      "url": "https://skima.jp/dl/detail?id=358795"
+    },
+    {
+      "title": "💤眠たげ制服男子",
+      "author": "犬野（わんの）",
+      "image": "https://cdn-common.skima.jp/dlsample/150/419/3150419/thumbnail-85d37943bbac80f1f17f2f8277e62bdf-20251219184747.jpeg",
+      "price": "10,000円",
+      "price_value": 10000,
+      "url": "https://skima.jp/dl/detail?id=356156"
+    },
+    {
       "title": "【表情７種】和メイドの女の子",
       "author": "iroiro",
       "image": "https://cdn-common.skima.jp/dlsample/172/879/3172879/thumbnail-52ce13a5a5e5c0b6bce534db16d02cbe-20260109203523.jpeg",
@@ -516,22 +532,6 @@
       "price": "12,000円",
       "price_value": 12000,
       "url": "https://skima.jp/dl/detail?id=358730"
-    },
-    {
-      "title": "【Adopt】宝石×白×女の子",
-      "author": "白木",
-      "image": "https://cdn-common.skima.jp/dlsample/172/274/3172274/thumbnail-121f9139ddecc3e7a82017020e35e821-20260109013810.jpeg",
-      "price": "86,000円",
-      "price_value": 86000,
-      "url": "https://skima.jp/dl/detail?id=358729"
-    },
-    {
-      "title": "【表情5種】肉まんを食べる男の子",
-      "author": "狐塚",
-      "image": "https://cdn-common.skima.jp/dlsample/172/247/3172247/thumbnail-e8395671f7afdc2d039c93c44e61ae18-20260109011153.jpeg",
-      "price": "4,500円",
-      "price_value": 4500,
-      "url": "https://skima.jp/dl/detail?id=358726"
     }
   ]
 }
