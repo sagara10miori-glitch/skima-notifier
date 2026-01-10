@@ -66,8 +66,5 @@ def build_embed(item):
         "fields": fields,
         "image": {
             "url": thumbnail
-        },
-        "footer": {
-            "text": "────────"
         }
     }
