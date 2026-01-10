@@ -10,6 +10,10 @@ def send_combined_notification(title, embeds):
         "embeds": embeds
     }
 
+    # ★ ここを追加 ★
+    print("=== PAYLOAD SENT TO DISCORD ===")
+    print(payload)
+
     response = requests.post(WEBHOOK_URL, json=payload)
 
     if response.status_code in (401, 404):
