@@ -1,11 +1,10 @@
 # embed.py
 
-from utils import format_url
+from utils import format_url, format_price, validate_image
 from score import get_label_and_color
 
 def build_embed(item):
     label, color = get_label_and_color(item["score"])
-
     framed_title = f"《  {item['title']}  》"
 
     fields = [
@@ -16,7 +15,6 @@ def build_embed(item):
         }
     ]
 
-    # ラベルがある場合のみ「優先度」フィールドを追加
     if label:
         fields.append({
             "name": "優先度",
@@ -24,14 +22,12 @@ def build_embed(item):
             "inline": True
         })
 
-    # 価格フィールド（ラベルは含めない）
     fields.append({
         "name": "価格",
-        "value": f"¥{item['price']:,}",
+        "value": format_price(item["price"]),
         "inline": True
     })
 
-    # 作者フィールド
     fields.append({
         "name": "作者",
         "value": item["author"],
@@ -43,10 +39,10 @@ def build_embed(item):
         "url": item["url"],
         "color": color,
         "fields": fields,
-
-        # 小さいサムネイルは削除
-        # 大きい画像のみ
         "image": {
-            "url": item["thumbnail"]
+            "url": validate_image(item["thumbnail"])
+        },
+        "footer": {
+            "text": "────────"
         }
     }
