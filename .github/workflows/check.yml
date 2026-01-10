@@ -9,12 +9,6 @@ jobs:
   run:
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        attempt: [1, 2]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,7 +37,7 @@ jobs:
         run: |
           python main.py
 
-      # ★ ここから追加：seen.json をリポジトリに保存する
+      # ★ seen.json をリポジトリに保存して永続化
       - name: Save seen.json
         run: |
           git config user.name "github-actions"
