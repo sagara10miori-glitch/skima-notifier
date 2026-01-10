@@ -9,8 +9,8 @@ def format_url(url):
     parsed = urlparse(url)
     if "id" in parse_qs(parsed.query):
         item_id = parse_qs(parsed.query)["id"][0]
-        return f"🔗 skima.jp/{item_id}"
-    return f"🔗 {normalize_url(url)}"
+        return f"🔗 https://skima.jp/dl/detail?id={item_id}"
+    return normalize_url(url)
 
 def format_price(price):
     return f"￥{price:,}"
