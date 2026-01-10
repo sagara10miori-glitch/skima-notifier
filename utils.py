@@ -53,3 +53,19 @@ def load_user_list(path):
     except FileNotFoundError:
         print(f"[WARN] ユーザーリストが見つかりません: {path}")
         return set()
+
+
+def format_url(url):
+    """
+    Discordで展開されないよう<>で囲む
+    """
+    return f"<{url}>" if url else "―"
+
+
+def format_price(price):
+    """
+    価格をカンマ付きで整形（¥3,000）
+    """
+    if price is None:
+        return "―"
+    return f"¥{price:,}"
