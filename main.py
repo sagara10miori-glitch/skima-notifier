@@ -14,9 +14,9 @@ def determine_title(has_priority, top_label):
         return "@everyone\n💌SKIMA　優先通知"
 
     if top_label == "🔥特選":
-        return "📢SKIMA　新着通知"
+        return "@everyone\n📢SKIMA　新着通知"
     elif top_label == "✨おすすめ":
-        return "🔔SKIMA　新着通知"
+        return "@everyone\n🔔SKIMA　新着通知"
     else:
         return "📝SKIMA　新着通知"
 
@@ -62,7 +62,7 @@ def main():
 
     # ★ 優先ユーザー or 特選 or おすすめ が含まれる場合は @everyone
     has_priority = any(
-        item["author_id"] in PRIORITY_USERS or item["score"] >= 2
+        item["author_id"] in PRIORITY_USERS
         for item in new_items
     )
 
