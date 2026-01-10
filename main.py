@@ -1,101 +1,61 @@
 # main.py
 
-from score import calculate_score
+from fetch import fetch_items
 from embed import build_embed
+from score import calculate_score
+from utils import load_user_list
+from seen_manager import load_seen_ids, save_seen_ids
 from notify import send_combined_notification
-from utils import load_seen_ids, save_seen_ids, load_user_list
-from config.settings import PRIORITY_USERS, EXCLUDE_USERS
+from config.settings import PRIORITY_USERS_PATH, EXCLUDE_USERS_PATH
 
+PRIORITY_USERS = load_user_list(PRIORITY_USERS_PATH)
+EXCLUDE_USERS = load_user_list(EXCLUDE_USERS_PATH)
 
-def determine_notification_title(items, PRIORITY_USERS):
-    # 優先ユーザーが含まれるか？
-    has_priority = any(item["author"] in PRIORITY_USERS for item in items)
-
-    # 最上位ラベルを探す
-    top_label = None
-    for item in items:
-        score = item["score"]
-        if score >= 3:
-            top_label = "🔥"
-            break
-        elif score == 2 and top_label != "🔥":
-            top_label = "✨"
-        elif score == 1 and top_label not in ("🔥", "✨"):
-            top_label = "⭐"
-
-    emoji_map = {
-        "🔥": "📢",
-        "✨": "🔔",
-        "⭐": "📝",
-        None: ""
-    }
-
-    icon = emoji_map[top_label]
-
-    # @everyone 条件
-    should_ping = (
-        has_priority or
-        top_label in ("🔥", "✨")
-    )
-
-    # 通知タイトル
+def determine_title(has_priority, top_label):
     if has_priority:
-        title = "💌SKIMA　優先通知"
+        return "@everyone\n💌SKIMA　優先通知"
+
+    if top_label == "🔥特選":
+        return "📢SKIMA　新着通知"
+    elif top_label == "✨おすすめ":
+        return "🔔SKIMA　新着通知"
     else:
-        if icon == "":
-            title = "SKIMA　新着通知"
-        else:
-            title = f"{icon}SKIMA　新着通知"
-
-    # @everyone 付与
-    if should_ping:
-        title = f"@everyone\n{title}"
-
-    return title
-
+        return "📝SKIMA　新着通知"
 
 def main():
-    seen_ids = load_seen_ids()
-
+    seen = load_seen_ids()
     items = fetch_items()
-    if not items:
-        return
 
-    # 新規のみ
-    new_items = [i for i in items if i["id"] not in seen_ids]
+    new_items = []
+    for item in items:
+        if item["id"] in seen:
+            continue
+        if item["author_id"] in EXCLUDE_USERS:
+            continue
 
-    # 除外ユーザー削除
-    new_items = [i for i in new_items if i["author"] not in EXCLUDE_USERS]
-
-    # スコア計算（価格のみ）
-    for item in new_items:
         item["score"] = calculate_score(item["price"])
-
-    # 並び順：優先ユーザー → スコア降順
-    new_items.sort(
-        key=lambda x: (
-            x["author"] in PRIORITY_USERS,
-            x["score"]
-        ),
-        reverse=True
-    )
-
-    # 最大10件
-    new_items = new_items[:10]
+        new_items.append(item)
 
     if not new_items:
+        print("新規なし")
         return
 
-    # 通知タイトル決定
-    title = determine_notification_title(new_items, PRIORITY_USERS)
+    new_items.sort(key=lambda x: (
+        x["author_id"] not in PRIORITY_USERS,
+        -x["score"]
+    ))
 
-    # embed をまとめて生成
-    embeds = [build_embed(item) for item in new_items]
+    embeds = [build_embed(item) for item in new_items[:10]]
 
-    # 1メッセージで送信
+    has_priority = any(item["author_id"] in PRIORITY_USERS for item in new_items)
+    top_label = embeds[0]["fields"][1]["value"]
+
+    title = determine_title(has_priority, top_label)
+
     send_combined_notification(title, embeds)
 
-    # seen.json 更新
-    for item in new_items:
-        seen_ids.append(item["id"])
-    save_seen_ids(seen_ids)
+    seen.update(item["id"] for item in new_items)
+    save_seen_ids(seen)
+
+if __name__ == "__main__":
+    main()
