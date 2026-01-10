@@ -1,14 +1,6 @@
-import os
+# config/settings.py
 
-print("WEBHOOK_URL raw:", repr(os.getenv("WEBHOOK_URL")))
+PRIORITY_USERS_PATH = "users/priority_users.txt"
+EXCLUDE_USERS_PATH = "users/exclude_users.txt"
 
-SKIMA_URL = "https://skima.jp/dl/search?cg=60"
-REQUEST_TIMEOUT = 10
-CHECK_INTERVAL = 60
-
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "").strip()
-if not WEBHOOK_URL:
-    raise ValueError("ERROR: WEBHOOK_URL is not set. Please configure GitHub Secrets.")
-
-PRIORITY_SCORE_THRESHOLD = 2
-RANDOM_DELAY_MAX = 5
+WEBHOOK_URL = "YOUR_WEBHOOK_URL"
