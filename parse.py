@@ -9,9 +9,7 @@ def fetch_items():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # DLページのカード
     cards = soup.select(".c-dlItemCard")
-
     items = []
 
     for card in cards:
