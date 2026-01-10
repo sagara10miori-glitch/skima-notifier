@@ -30,6 +30,8 @@ def should_notify(item):
         return True
     if item.get("score", 0) < 60:
         return False
+    if item.get("price", 0) > 15000:
+        return False
     return True
 
 # 優先度ラベル → 数値
