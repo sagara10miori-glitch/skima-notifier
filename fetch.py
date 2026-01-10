@@ -16,14 +16,12 @@ def safe_get(url, retries=3):
         try:
             r = session.get(url, timeout=10)
 
-            # 429 → 待機
             if r.status_code == 429:
                 wait = 2 ** i
                 print(f"[WARN] 429 → {wait}秒待機")
                 time.sleep(wait)
                 continue
 
-            # 403 → UA変更して再試行
             if r.status_code == 403:
                 print("[WARN] 403 → User-Agent変更して再試行")
                 session.headers.update({
@@ -79,7 +77,6 @@ def parse_items(html):
             author_id = author_link["href"].rstrip("/").split("/")[-1]
             thumbnail = validate_image(img_el["src"])
 
-            # 異常価格はスキップ
             if price <= 0 or price == 999999:
                 continue
 
