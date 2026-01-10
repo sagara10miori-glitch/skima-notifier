@@ -1,30 +1,34 @@
 # fetch.py
 
 import time
-import cloudscraper
+import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from utils import validate_image, normalize_url
 
-# Cloudflare突破用 scraper
-scraper = cloudscraper.create_scraper(
-    browser={
-        "browser": "firefox",
-        "platform": "windows",
-        "mobile": False
-    }
-)
+session = requests.Session()
+session.headers.update({
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+})
 
 def safe_get(url, retries=3):
     for i in range(retries):
         try:
-            r = scraper.get(url, timeout=15)
+            r = session.get(url, timeout=10)
 
-            # Cloudflare突破後でも 403/503 が出ることがある
-            if r.status_code in (403, 503):
+            # 429 → 待機
+            if r.status_code == 429:
                 wait = 2 ** i
-                print(f"[WARN] {r.status_code} → {wait}秒待機して再試行")
+                print(f"[WARN] 429 → {wait}秒待機")
                 time.sleep(wait)
+                continue
+
+            # 403 → UA変更して再試行
+            if r.status_code == 403:
+                print("[WARN] 403 → User-Agent変更して再試行")
+                session.headers.update({
+                    "User-Agent": f"Mozilla/5.0 (Windows NT 10.0; rv:{i+70}.0)"
+                })
                 continue
 
             return r
@@ -48,29 +52,28 @@ def parse_items(html):
     soup = BeautifulSoup(html, "lxml")
     items = []
 
-    # SKIMA の UI 変更に強い柔軟セレクタ
-    boxes = soup.select(".item-box")
+    # DLページの作品ボックス
+    boxes = soup.select(".dl-item")
     if not boxes:
-        boxes = soup.select(".item-card")
-    if not boxes:
-        boxes = soup.select("[class*=item]")
+        boxes = soup.select("[class*=dl]")
     if not boxes:
         print("[WARN] 作品ボックスが見つかりません")
         return []
 
     for box in boxes:
         try:
-            title_el = safe_select(box, [".item-title", ".title", ".card-title", "[class*=title]"])
+            title_el = safe_select(box, [".item-title", ".title", "[class*=title]"])
             price_el = safe_select(box, [".item-price", ".price", "span:contains('円')"])
-            author_el = safe_select(box, [".item-creator", ".creator-name", "[class*=creator]"])
+            author_el = safe_select(box, [".item-creator", "[class*=creator]"])
             img_el = box.select_one("img")
             author_link = box.select_one("a[href*='/creator/']")
+            link_el = box.select_one("a[href*='/dl/']")
 
-            if not (title_el and price_el and author_el and img_el and author_link):
+            if not (title_el and price_el and author_el and img_el and author_link and link_el):
                 continue
 
             title = title_el.get_text(strip=True)
-            url = normalize_url(box.select_one("a")["href"])
+            url = normalize_url(link_el["href"])
             price = int(price_el.get_text(strip=True).replace("￥", "").replace(",", ""))
             author = author_el.get_text(strip=True)
             author_id = author_link["href"].rstrip("/").split("/")[-1]
@@ -106,12 +109,11 @@ def fetch_page(url):
 
 def fetch_items():
     base_urls = [
-        "https://skima.jp/item/list?category=1",
-        "https://skima.jp/item/list?category=2",
+        "https://skima.jp/dl/search",   # ← これだけでOK
     ]
 
     items = []
-    with ThreadPoolExecutor(max_workers=5) as exe:
+    with ThreadPoolExecutor(max_workers=3) as exe:
         for result in exe.map(fetch_page, base_urls):
             items.extend(result)
 
