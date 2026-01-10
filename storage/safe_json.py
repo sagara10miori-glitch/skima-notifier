@@ -3,7 +3,6 @@ import os
 
 STORAGE_PATH = "storage/seen.json"
 
-
 def load_seen_ids():
     if not os.path.exists(STORAGE_PATH):
         return []
@@ -13,7 +12,6 @@ def load_seen_ids():
             return json.load(f)
     except Exception:
         return []
-
 
 def save_seen_ids(ids):
     os.makedirs("storage", exist_ok=True)
