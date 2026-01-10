@@ -1,21 +1,20 @@
+# notify.py
+
+import time
 import requests
 from config.settings import WEBHOOK_URL
 
-def send_notification(item):
-    embed = {
-        "title": item["title"],
-        "url": item["url"],
-        "thumbnail": {"url": item["thumbnail"]},
-        "fields": [
-            {"name": "価格", "value": f"¥{item['price']:,}"},
-            {"name": "作者", "value": item["author"]},
-            {"name": "スコア", "value": str(item["score"])},
-        ]
+def send_combined_notification(title, embeds):
+    payload = {
+        "content": title,
+        "embeds": embeds
     }
 
-    payload = {"embeds": [embed]}
-
     response = requests.post(WEBHOOK_URL, json=payload)
-    response.raise_for_status()
 
-    print(f"Sent notification: {item['title']}")
+    if response.status_code == 429:
+        retry = response.json().get("retry_after", 1000) / 1000
+        time.sleep(retry)
+        response = requests.post(WEBHOOK_URL, json=payload)
+
+    response.raise_for_status()
