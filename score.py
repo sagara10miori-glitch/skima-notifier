@@ -1,7 +1,6 @@
 # score.py
 
 def calculate_score(price):
-    """価格に応じてスコアを決定（逆スコア方式）"""
     if price <= 5000:
         return 3
     elif price <= 8000:
@@ -13,12 +12,10 @@ def calculate_score(price):
     else:
         return 0
 
-
 def get_label_and_color(score):
-    """スコアに応じてラベルと色を返す"""
     if score == 3:
-        return "🔥特選", 0xE74C3C  # 赤
+        return "🔥特選", 0xE74C3C
     elif score == 2:
-        return "✨おすすめ", 0x3498DB  # 青
-    else:  # 1以下
-        return "⭐注目", 0x2ECC71  # 緑
+        return "✨おすすめ", 0x3498DB
+    else:
+        return "⭐注目", 0x2ECC71
