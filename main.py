@@ -1,59 +1,39 @@
-import traceback
-from fetch import fetch_page
-from parse import parse_items
+import time
+from parse import fetch_items
 from notify import send_notification
-from utils.safe_json import load_seen, save_seen
-from config.settings import SKIMA_URL
-from datetime import datetime
-import os
-
-LOG_PATH = "logs/notifier.log"
-
-
-def log(message: str):
-    os.makedirs("logs", exist_ok=True)
-    with open(LOG_PATH, "a", encoding="utf-8") as f:
-        f.write(f"[{datetime.now()}] {message}\n")
+from storage.safe_json import load_seen_ids, save_seen_ids
+from config.settings import CHECK_INTERVAL
 
 
 def main():
-    try:
-        log("=== Notifier started ===")
+    print("=== Notifier started ===")
 
-        # seen.json を安全に読み込み（破損していても自動修復）
-        seen = load_seen()
+    seen_ids = load_seen_ids()
 
-        # SKIMA ページ取得（3回リトライ）
-        html = fetch_page(SKIMA_URL)
-        if html is None:
-            log("ERROR: fetch_page returned None")
-            return
+    while True:
+        print("Fetching items...")
+        items = fetch_items()
 
-        # HTML解析（フェイルセーフ付き）
-        items = parse_items(html)
         if not items:
-            log("WARNING: parse_items returned empty list")
-            return
+            print("No items found. Retrying...")
+            time.sleep(CHECK_INTERVAL)
+            continue
 
-        new_items = [item for item in items if item["id"] not in seen]
+        new_items = [item for item in items if item["id"] not in seen_ids]
 
-        if not new_items:
-            log("No new items.")
-            return
+        if new_items:
+            print(f"Found {len(new_items)} new items.")
 
-        for item in new_items:
-            send_notification(item)
-            seen.append(item["id"])
+            for item in new_items:
+                print(f"Sending notification for: {item['title']}")
+                send_notification(item)
+                seen_ids.append(item["id"])
 
-        # seen.json を保存（最大100件）
-        save_seen(seen)
+            save_seen_ids(seen_ids)
+        else:
+            print("No new items.")
 
-        log(f"Sent {len(new_items)} notifications.")
-
-    except Exception as e:
-        log("FATAL ERROR:")
-        log(str(e))
-        log(traceback.format_exc())
+        time.sleep(CHECK_INTERVAL)
 
 
 if __name__ == "__main__":
