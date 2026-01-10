@@ -42,7 +42,7 @@ def parse_items(html):
     soup = BeautifulSoup(html, "lxml")
     items = []
 
-    # SKIMA DLページの作品ボックス
+    # SKIMA の DL 検索結果の作品ボックス
     boxes = soup.select("div.inner")
     if not boxes:
         print("[WARN] 作品ボックスが見つかりません")
@@ -50,19 +50,21 @@ def parse_items(html):
 
     for box in boxes:
         try:
-            # URL（相対パス → 絶対URL に変換）
+            # ★ URL（最新 SKIMA 仕様に完全対応）
+            #   a[href^='/dl/detail'] → 最も確実
+            #   a[href*='dl/detail']   → 念のための保険
             link_el = box.select_one("a[href^='/dl/detail'], a[href*='dl/detail']")
             if not link_el:
                 continue
-            
-            raw_url = link_el["href"]
-            
+
+            raw_url = link_el.get("href", "")
+
             # 相対パス → 絶対URL
             if raw_url.startswith("/"):
                 url = "https://skima.jp" + raw_url
             else:
                 url = raw_url
-            
+
             url = normalize_url(url)
 
             # サムネイル
