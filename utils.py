@@ -1,12 +1,16 @@
 # utils.py
 import requests
+from urllib.parse import urlparse, parse_qs
 
 def normalize_url(url):
     return url.rstrip("/")
 
 def format_url(url):
-    clean = normalize_url(url.split("?")[0])
-    return f"🔗 {clean}"
+    parsed = urlparse(url)
+    if "id" in parse_qs(parsed.query):
+        item_id = parse_qs(parsed.query)["id"][0]
+        return f"🔗 skima.jp/{item_id}"
+    return f"🔗 {normalize_url(url)}"
 
 def format_price(price):
     return f"￥{price:,}"
