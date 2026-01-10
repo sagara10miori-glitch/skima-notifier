@@ -50,35 +50,38 @@ def parse_items(html):
     soup = BeautifulSoup(html, "lxml")
     items = []
 
-    # DLページの作品ボックス
-    boxes = soup.select(".dl-item")
-    if not boxes:
-        boxes = soup.select("[class*=dl]")
+    # SKIMA DLページの作品ボックス
+    boxes = soup.select("div.inner")
     if not boxes:
         print("[WARN] 作品ボックスが見つかりません")
         return []
 
     for box in boxes:
         try:
-            title_el = safe_select(box, [".item-title", ".title", "[class*=title]"])
-            price_el = safe_select(box, [".item-price", ".price", "span:contains('円')"])
-            author_el = safe_select(box, [".item-creator", "[class*=creator]"])
-            img_el = box.select_one("img")
-            author_link = box.select_one("a[href*='/creator/']")
-            link_el = box.select_one("a[href*='/dl/']")
-
-            if not (title_el and price_el and author_el and img_el and author_link and link_el):
+            # URL
+            link_el = box.select_one(".image a[href*='/dl/detail']")
+            if not link_el:
                 continue
-
-            title = title_el.get_text(strip=True)
             url = normalize_url(link_el["href"])
-            price = int(price_el.get_text(strip=True).replace("￥", "").replace(",", ""))
-            author = author_el.get_text(strip=True)
-            author_id = author_link["href"].rstrip("/").split("/")[-1]
-            thumbnail = validate_image(img_el["src"])
 
-            if price <= 0 or price == 999999:
-                continue
+            # サムネ
+            img_el = box.select_one(".image img")
+            thumbnail = validate_image(img_el["src"]) if img_el else None
+
+            # 価格
+            price_el = box.select_one(".image .price")
+            price = int(price_el.get_text(strip=True).replace("¥", "").replace(",", ""))
+
+            # タイトル
+            title_el = box.select_one(".details h5 a")
+            title = title_el.get_text(strip=True) if title_el else "無題"
+
+            # 作者
+            author_el = box.select_one(".details .username a")
+            author = author_el.get_text(strip=True) if author_el else "不明"
+
+            # 作者ID
+            author_id = author_el["href"].split("=")[-1] if author_el else "0"
 
             items.append({
                 "id": url,
