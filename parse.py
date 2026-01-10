@@ -9,24 +9,32 @@ def fetch_items():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    cards = soup.select(".c-dlItemCard")
+    # 商品カードは .inner
+    cards = soup.select(".inner")
+
     items = []
 
     for card in cards:
         try:
-            link = card.select_one("a")
+            # URL
+            link = card.select_one(".image a")
             url = "https://skima.jp" + link.get("href")
-            item_id = url.rstrip("/").split("/")[-1]
+            item_id = url.split("id=")[-1]
 
-            title = card.select_one(".c-dlItemCard__title").get_text(strip=True)
+            # サムネイル
+            thumbnail = card.select_one(".image img").get("src")
 
-            price_text = card.select_one(".c-dlItemCard__price").get_text(strip=True)
+            # 価格
+            price_text = card.select_one(".image .price").get_text(strip=True)
             price = int(price_text.replace("¥", "").replace(",", ""))
 
-            author = card.select_one(".c-dlItemCard__userName").get_text(strip=True)
+            # タイトル
+            title = card.select_one(".details h5 a").get_text(strip=True)
 
-            thumbnail = card.select_one("img").get("src")
+            # 作者
+            author = card.select_one(".details .username a").get_text(strip=True)
 
+            # スコア
             score = calculate_score(price)
 
             items.append({
