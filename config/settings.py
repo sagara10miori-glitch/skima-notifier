@@ -1,5 +1,5 @@
 import os
-
+print("WEBHOOK_URL raw:", repr(os.getenv("WEBHOOK_URL")))
 # -----------------------------------
 # SKIMA の監視対象URL
 # -----------------------------------
