@@ -92,6 +92,9 @@ def parse_items(html):
 
 def fetch_page(url):
     r = safe_get(url)
+
+    print(r.text[:2000])
+
     if not r:
         return []
     return parse_items(r.text)
