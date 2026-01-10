@@ -4,7 +4,6 @@ from notify import send_notification
 from storage.safe_json import load_seen_ids, save_seen_ids
 from config.settings import CHECK_INTERVAL
 
-
 def main():
     print("=== Notifier started ===")
 
@@ -34,7 +33,6 @@ def main():
             print("No new items.")
 
         time.sleep(CHECK_INTERVAL)
-
 
 if __name__ == "__main__":
     main()
