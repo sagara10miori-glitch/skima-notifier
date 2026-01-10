@@ -10,7 +10,7 @@ SKIMA_URL = "https://skima.jp/item-list?category_id=1"
 # -----------------------------------
 # Discord Webhook URL（Secretsから取得）
 # -----------------------------------
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "").strip()
 
 if not WEBHOOK_URL:
     raise ValueError("ERROR: WEBHOOK_URL is not set. Please configure GitHub Secrets.")
