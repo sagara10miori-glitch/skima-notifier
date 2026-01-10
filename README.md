@@ -41,6 +41,7 @@ SKIMA の新着商品を自動で取得し、Discord に美しい Embed で通�
 
 ## 📁 ディレクトリ構成
 
+<details>
 skima-notifier/
   ├── .github/
   │   └── workflows/
@@ -63,3 +64,4 @@ skima-notifier/
   ├── seen.json                      # 通知済み作品IDの記録
   ├── requirements.txt               # 必要なPythonパッケージ一覧
   └── README.md                      # プロジェクト説明
+</details>
