@@ -1,5 +1,3 @@
-# main.py
-
 from fetch import fetch_items
 from embed import build_embed
 from score import calculate_score
@@ -21,6 +19,13 @@ def determine_title(has_priority, top_label):
         return "🔔SKIMA　新着通知"
     else:
         return "📝SKIMA　新着通知"
+
+def safe_top_label(embed):
+    fields = embed.get("fields", [])
+    for f in fields:
+        if f["name"] == "優先度":
+            return f["value"]
+    return ""
 
 def main():
     seen = load_seen_ids()
@@ -47,9 +52,13 @@ def main():
 
     embeds = [build_embed(item) for item in new_items[:10]]
 
-    has_priority = any(item["author_id"] in PRIORITY_USERS for item in new_items)
-    top_label = embeds[0]["fields"][1]["value"]
+    # 🔥 特選 or ✨おすすめ or 優先ユーザー → @everyone
+    has_priority = any(
+        item["author_id"] in PRIORITY_USERS or item["score"] >= 2
+        for item in new_items
+    )
 
+    top_label = safe_top_label(embeds[0])
     title = determine_title(has_priority, top_label)
 
     send_combined_notification(title, embeds)
