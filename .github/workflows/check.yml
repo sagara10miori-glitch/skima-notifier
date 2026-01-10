@@ -2,23 +2,24 @@ name: SKIMA Notifier
 
 on:
   schedule:
-    - cron: "*/5 * * * *"   # 5分ごと
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
 
-    # 自動リトライ（GitHub Actions側）
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        attempt: [1, 2]   # 最大2回再実行
+        attempt: [1, 2]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true   # ★ 自動コミットに必要
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -41,3 +42,12 @@ jobs:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
         run: |
           python main.py
+
+      # ★ ここから追加：seen.json をリポジトリに保存する
+      - name: Save seen.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add seen.json
+          git commit -m "Update seen.json" || echo "No changes"
+          git push
