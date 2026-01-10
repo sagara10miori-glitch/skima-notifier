@@ -58,11 +58,18 @@ def parse_items(html):
 
     for box in boxes:
         try:
-            # URL
+            # URL（相対パス → 絶対URL に修正）
             link_el = box.select_one(".image a[href*='/dl/detail']")
             if not link_el:
                 continue
-            url = normalize_url(link_el["href"])
+
+            raw_url = link_el["href"]
+            if raw_url.startswith("/"):
+                url = "https://skima.jp" + raw_url
+            else:
+                url = raw_url
+
+            url = normalize_url(url)
 
             # サムネ
             img_el = box.select_one(".image img")
@@ -109,7 +116,7 @@ def fetch_page(url):
 
 def fetch_items():
     base_urls = [
-        "https://skima.jp/dl/search",   # ← これだけでOK
+        "https://skima.jp/dl/search",
     ]
 
     items = []
