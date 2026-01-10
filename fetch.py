@@ -51,17 +51,18 @@ def parse_items(html):
     for box in boxes:
         try:
             # URL（相対パス → 絶対URL に変換）
-            # ★ SKIMA の最新構造に対応：a[href*='/dl/detail'] を直接検索
-            link_el = box.select_one("a[href*='/dl/detail']")
+            link_el = box.select_one("a[href^='/dl/detail'], a[href*='dl/detail']")
             if not link_el:
                 continue
-
+            
             raw_url = link_el["href"]
+            
+            # 相対パス → 絶対URL
             if raw_url.startswith("/"):
                 url = "https://skima.jp" + raw_url
             else:
                 url = raw_url
-
+            
             url = normalize_url(url)
 
             # サムネイル
