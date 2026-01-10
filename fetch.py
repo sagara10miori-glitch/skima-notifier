@@ -1,35 +1,30 @@
 # fetch.py
 
 import time
-import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from utils import validate_image, normalize_url
 
-session = requests.Session()
-session.headers.update({"User-Agent": "Mozilla/5.0"})
+# Cloudflare突破用 scraper
+scraper = cloudscraper.create_scraper(
+    browser={
+        "browser": "firefox",
+        "platform": "windows",
+        "mobile": False
+    }
+)
 
 def safe_get(url, retries=3):
-    headers = {"User-Agent": "Mozilla/5.0"}
-
     for i in range(retries):
         try:
-            r = session.get(url, timeout=10, headers=headers)
+            r = scraper.get(url, timeout=15)
 
-            if r.status_code == 429:
-                wait = (2 ** i)
-                print(f"[WARN] 429 → {wait}秒待機")
+            # Cloudflare突破後でも 403/503 が出ることがある
+            if r.status_code in (403, 503):
+                wait = 2 ** i
+                print(f"[WARN] {r.status_code} → {wait}秒待機して再試行")
                 time.sleep(wait)
-                continue
-
-            if r.status_code == 403:
-                headers["User-Agent"] = f"Mozilla/5.0 (Windows NT 10.0; rv:{i+70}.0)"
-                print("[WARN] 403 → User-Agent変更して再試行")
-                continue
-
-            if r.status_code == 503:
-                print("[WARN] 503 → 再試行")
-                time.sleep(2)
                 continue
 
             return r
@@ -53,13 +48,23 @@ def parse_items(html):
     soup = BeautifulSoup(html, "lxml")
     items = []
 
-    for box in soup.select(".item-box"):
+    # SKIMA の UI 変更に強い柔軟セレクタ
+    boxes = soup.select(".item-box")
+    if not boxes:
+        boxes = soup.select(".item-card")
+    if not boxes:
+        boxes = soup.select("[class*=item]")
+    if not boxes:
+        print("[WARN] 作品ボックスが見つかりません")
+        return []
+
+    for box in boxes:
         try:
-            title_el = safe_select(box, [".item-title", ".title", "h1", "[class*=title]"])
-            price_el = safe_select(box, [".item-price", "span:contains('円')"])
-            author_el = safe_select(box, [".item-creator", "[class*=creator]"])
+            title_el = safe_select(box, [".item-title", ".title", ".card-title", "[class*=title]"])
+            price_el = safe_select(box, [".item-price", ".price", "span:contains('円')"])
+            author_el = safe_select(box, [".item-creator", ".creator-name", "[class*=creator]"])
             img_el = box.select_one("img")
-            author_link = box.select_one(".item-creator a")
+            author_link = box.select_one("a[href*='/creator/']")
 
             if not (title_el and price_el and author_el and img_el and author_link):
                 continue
@@ -71,6 +76,7 @@ def parse_items(html):
             author_id = author_link["href"].rstrip("/").split("/")[-1]
             thumbnail = validate_image(img_el["src"])
 
+            # 異常価格はスキップ
             if price <= 0 or price == 999999:
                 continue
 
@@ -84,7 +90,8 @@ def parse_items(html):
                 "thumbnail": thumbnail
             })
 
-        except:
+        except Exception as e:
+            print("[ERROR] parse error:", e)
             continue
 
     return items
@@ -92,9 +99,6 @@ def parse_items(html):
 
 def fetch_page(url):
     r = safe_get(url)
-
-    print(r.text[:2000])
-
     if not r:
         return []
     return parse_items(r.text)
