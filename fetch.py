@@ -42,6 +42,7 @@ def parse_items(html):
     soup = BeautifulSoup(html, "lxml")
     items = []
 
+    # SKIMA DLページの作品ボックス
     boxes = soup.select("div.inner")
     if not boxes:
         print("[WARN] 作品ボックスが見つかりません")
@@ -50,7 +51,8 @@ def parse_items(html):
     for box in boxes:
         try:
             # URL（相対パス → 絶対URL に変換）
-            link_el = box.select_one(".image a[href*='/dl/detail']")
+            # ★ SKIMA の最新構造に対応：a[href*='/dl/detail'] を直接検索
+            link_el = box.select_one("a[href*='/dl/detail']")
             if not link_el:
                 continue
 
@@ -63,19 +65,19 @@ def parse_items(html):
             url = normalize_url(url)
 
             # サムネイル
-            img_el = box.select_one(".image img")
+            img_el = box.select_one("img")
             thumbnail = validate_image(img_el["src"]) if img_el else None
 
             # 価格
-            price_el = box.select_one(".image .price")
-            price = int(price_el.get_text(strip=True).replace("¥", "").replace(",", ""))
+            price_el = box.select_one(".price")
+            price = int(price_el.get_text(strip=True).replace("¥", "").replace(",", "")) if price_el else 0
 
             # タイトル
-            title_el = box.select_one(".details h5 a")
+            title_el = box.select_one("h5 a")
             title = title_el.get_text(strip=True) if title_el else "無題"
 
             # 作者
-            author_el = box.select_one(".details .username a")
+            author_el = box.select_one(".username a")
             author = author_el.get_text(strip=True) if author_el else "不明"
 
             # 作者ID
