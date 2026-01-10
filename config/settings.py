@@ -2,7 +2,7 @@ import os
 
 print("WEBHOOK_URL raw:", repr(os.getenv("WEBHOOK_URL")))
 
-SKIMA_URL = "https://skima.jp/item-list?category_id=1"
+SKIMA_URL = "https://skima.jp/dl/search?cg=60"
 REQUEST_TIMEOUT = 10
 CHECK_INTERVAL = 60
 
