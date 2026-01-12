@@ -42,18 +42,22 @@ def main():
     items = fetch_items()
 
     new_items = []
-    for item in items:
-        # すでに取得済みなら通知しない
-        if item["id"] in seen:
-            continue
+for item in items:
+    # すでに取得済みなら通知しない
+    if item["id"] in seen:
+        continue
 
-        # 除外ユーザー
-        if item["author_id"] in EXCLUDE_USERS:
-            continue
+    # 除外ユーザー
+    if item["author_id"] in EXCLUDE_USERS:
+        continue
 
-        # スコア付与
-        item["score"] = calculate_score(item["price"])
-        new_items.append(item)
+    # ★ 15000円以上は通知しない
+    if item["price"] >= 15000:
+        continue
+
+    # スコア付与
+    item["score"] = calculate_score(item["price"])
+    new_items.append(item)
 
     if not new_items:
         print("新規なし")
