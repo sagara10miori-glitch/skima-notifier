@@ -5,6 +5,16 @@ from utils import load_user_list
 from seen_manager import load_seen_ids, save_seen_ids
 from notify import send_combined_notification
 from config.settings import PRIORITY_USERS_PATH, EXCLUDE_USERS_PATH
+from datetime import datetime
+import pytz
+
+jst = pytz.timezone("Asia/Tokyo")
+now = datetime.now(jst)
+
+# 深夜帯（1:00〜6:00）は通知しない
+if 1 <= now.hour < 6:
+    print("深夜帯（1:00〜6:00）のため通知をスキップ")
+    exit()
 
 PRIORITY_USERS = load_user_list(PRIORITY_USERS_PATH)
 EXCLUDE_USERS = load_user_list(EXCLUDE_USERS_PATH)
