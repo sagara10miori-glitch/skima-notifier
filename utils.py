@@ -13,7 +13,7 @@ def format_url(url):
     return normalize_url(url)
 
 def format_price(price):
-    return f"￥{price:,}"
+    return f"{price:,}円"
 
 def validate_image(url):
     try:
