@@ -8,65 +8,70 @@ from config.settings import PRIORITY_USERS_PATH, EXCLUDE_USERS_PATH
 from datetime import datetime
 import pytz
 
+# --- 深夜帯スキップ ---------------------------------------------------------
+
 jst = pytz.timezone("Asia/Tokyo")
 now = datetime.now(jst)
 
-# 深夜帯（1:00〜6:00）は通知しない
 if 1 <= now.hour < 6:
     print("深夜帯（1:00〜6:00）のため通知をスキップ")
     exit()
 
+# --- 設定読み込み -----------------------------------------------------------
+
 PRIORITY_USERS = load_user_list(PRIORITY_USERS_PATH)
 EXCLUDE_USERS = load_user_list(EXCLUDE_USERS_PATH)
+
+# --- タイトル決定 -----------------------------------------------------------
 
 def determine_title(has_priority, top_label):
     if has_priority:
         return "@everyone\n💌SKIMA　優先通知"
-
     if top_label == "🔥特選":
         return "@everyone\n📢SKIMA　新着通知"
-    elif top_label == "✨おすすめ":
+    if top_label == "✨おすすめ":
         return "@everyone\n🔔SKIMA　新着通知"
-    else:
-        return "📝SKIMA　新着通知"
+    return "📝SKIMA　新着通知"
 
 def safe_top_label(embed):
-    fields = embed.get("fields", [])
-    for f in fields:
+    for f in embed.get("fields", []):
         if f["name"] == "優先度":
             return f["value"]
     return ""
+
+# --- メイン処理 -------------------------------------------------------------
 
 def main():
     seen = load_seen_ids()
     items = fetch_items()
 
+    # --- フィルタリング -----------------------------------------------------
+
     new_items = []
-for item in items:
-    # すでに取得済みなら通知しない
-    if item["id"] in seen:
-        continue
+    for item in items:
 
-    # 除外ユーザー
-    if item["author_id"] in EXCLUDE_USERS:
-        continue
+        if item["id"] in seen:
+            continue
 
-    # ★ 15000円以上は通知しない
-    if item["price"] >= 15000:
-        continue
+        if item["author_id"] in EXCLUDE_USERS:
+            continue
 
-    # スコア付与
-    item["score"] = calculate_score(item["price"])
-    new_items.append(item)
+        if item["price"] >= 15000:
+            continue
+
+        item["score"] = calculate_score(item["price"])
+        new_items.append(item)
+
+    # --- 新規なし -----------------------------------------------------------
 
     if not new_items:
         print("新規なし")
-        # ★ 今回取得した全アイテムを seen に追加（通知なしでも記録）
         seen.update(item["id"] for item in items)
         save_seen_ids(seen)
         return
 
-    # 並び順：優先ユーザー → スコア高い順
+    # --- 並び替え（優先ユーザー → スコア高い順） --------------------------
+
     new_items.sort(key=lambda x: (
         x["author_id"] not in PRIORITY_USERS,
         -x["score"]
@@ -74,20 +79,22 @@ for item in items:
 
     embeds = [build_embed(item) for item in new_items[:10]]
 
-    # ★ 優先ユーザー or 特選 or おすすめ が含まれる場合は @everyone
-    has_priority = any(
-        item["author_id"] in PRIORITY_USERS
-        for item in new_items
-    )
+    # --- 通知タイトル --------------------------------------------------------
 
+    has_priority = any(item["author_id"] in PRIORITY_USERS for item in new_items)
     top_label = safe_top_label(embeds[0])
     title = determine_title(has_priority, top_label)
 
+    # --- 通知送信 -----------------------------------------------------------
+
     send_combined_notification(title, embeds)
 
-    # ★ 今回取得した全アイテムを seen に追加（通知したものだけでなく全部）
+    # --- seen.json 更新 ------------------------------------------------------
+
     seen.update(item["id"] for item in items)
     save_seen_ids(seen)
+
+# --- 実行 -------------------------------------------------------------------
 
 if __name__ == "__main__":
     main()
