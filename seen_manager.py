@@ -1,6 +1,5 @@
 import sqlite3
 import time
-import os
 
 DB_PATH = "seen.db"
 KEEP_DAYS = 7
