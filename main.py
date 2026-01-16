@@ -2,7 +2,7 @@ from fetch import fetch_items
 from embed import build_embed
 from score import calculate_score
 from utils import load_user_list
-from seen_manager import load_seen_ids, save_seen_ids
+from seen_manager import load_seen_ids, mark_seen, cleanup_old_entries
 from notify import (
     send_webhook_message,
     send_bot_message,
@@ -37,6 +37,8 @@ def safe_top_label(embed):
 
 def main():
     now = datetime.now(ZoneInfo("Asia/Tokyo"))
+
+    # SQLiteから既存IDを読み込み
     seen = load_seen_ids()
 
     # 深夜帯は優先通知だけ fetch して高速化
@@ -55,10 +57,12 @@ def main():
         item["score"] = calculate_score(item["price"])
         new_items.append(item)
 
+        # 新規IDをSQLiteに記録
+        mark_seen(item["id"])
+
     if not new_items:
         print("新規なし")
-        seen.update(item["id"] for item in items)
-        save_seen_ids(seen)
+        cleanup_old_entries()
         return
 
     priority_items = [i for i in new_items if i["author_id"] in PRIORITY_USERS]
@@ -94,8 +98,8 @@ def main():
 
             send_webhook_message(title, embeds)
 
-    seen.update(item["id"] for item in items)
-    save_seen_ids(seen)
+    # --- 1週間より古いIDを削除 ---
+    cleanup_old_entries()
 
 
 if __name__ == "__main__":
