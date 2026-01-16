@@ -1,32 +1,62 @@
-import json
+import sqlite3
 import time
+import os
 
-SEEN_FILE = "seen.json"
+DB_PATH = "seen.db"
 KEEP_DAYS = 7
 KEEP_SECONDS = KEEP_DAYS * 24 * 60 * 60
 
 
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS seen (
+            item_id TEXT PRIMARY KEY,
+            timestamp REAL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
 def load_seen_ids():
-    try:
-        with open(SEEN_FILE, "r") as f:
-            return json.load(f)  # {id: timestamp}
-    except:
-        return {}
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    cur.execute("SELECT item_id FROM seen")
+    rows = cur.fetchall()
+
+    conn.close()
+    return {row[0] for row in rows}
 
 
-def save_seen_ids(seen_dict):
-    now = time.time()
+def mark_seen(item_id):
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
 
-    # 1週間より古いIDを削除
-    cleaned = {
-        item_id: ts
-        for item_id, ts in seen_dict.items()
-        if now - ts <= KEEP_SECONDS
-    }
+    cur.execute(
+        "INSERT OR REPLACE INTO seen (item_id, timestamp) VALUES (?, ?)",
+        (item_id, time.time())
+    )
 
-    with open(SEEN_FILE, "w") as f:
-        json.dump(cleaned, f)
+    conn.commit()
+    conn.close()
 
 
-def mark_seen(seen_dict, item_id):
-    seen_dict[item_id] = time.time()
+def cleanup_old_entries():
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    limit = time.time() - KEEP_SECONDS
+
+    cur.execute("DELETE FROM seen WHERE timestamp < ?", (limit,))
+    deleted = cur.rowcount
+
+    conn.commit()
+    conn.close()
+
+    return deleted
