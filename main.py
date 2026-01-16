@@ -22,6 +22,23 @@ PRIORITY_USERS = load_user_list(PRIORITY_USERS_PATH)
 EXCLUDE_USERS = load_user_list(EXCLUDE_USERS_PATH)
 
 
+# --- タイトル決定（通常通知用） --------------------------------------------
+
+def determine_title(top_label):
+    if top_label == "🔥特選":
+        return "📢SKIMA　新着通知"
+    if top_label == "✨おすすめ":
+        return "🔔SKIMA　新着通知"
+    return "📝SKIMA　新着通知"
+
+
+def safe_top_label(embed):
+    for f in embed.get("fields", []):
+        if f["name"] == "優先度":
+            return f["value"]
+    return ""
+
+
 # --- メイン処理 -------------------------------------------------------------
 
 def main():
@@ -76,7 +93,7 @@ def main():
         if last:
             unpin_message(last["id"])
 
-        # 新しい優先通知を送信
+        # 新しい優先通知を送信（@everyone 付き）
         msg = send_bot_message("@everyone\n💌SKIMA 優先通知", embeds)
 
         # ピン止め
@@ -92,7 +109,11 @@ def main():
         if normal_items:
             normal_items.sort(key=lambda x: -x["score"])
             embeds = [build_embed(item) for item in normal_items[:10]]
-            send_webhook_message("📝SKIMA 新着通知", embeds)
+
+            top_label = safe_top_label(embeds[0])
+            title = determine_title(top_label)
+
+            send_webhook_message(title, embeds)
 
     # --- seen.json 更新 ------------------------------------------------------
 
