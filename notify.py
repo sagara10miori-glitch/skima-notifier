@@ -1,29 +1,42 @@
-# notify.py
-
-import time
 import requests
-from config.settings import WEBHOOK_URL
+import os
 
-def send_combined_notification(title, embeds):
-    payload = {
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID")
+
+
+# --- Webhook 通常通知 --------------------------------------------------------
+
+def send_webhook_message(title, embeds):
+    data = {
         "content": title,
         "embeds": embeds
     }
+    r = requests.post(WEBHOOK_URL, json=data)
+    return r.json()
 
-    # ★ ここを追加 ★
-    print("=== PAYLOAD SENT TO DISCORD ===")
-    print(payload)
 
-    response = requests.post(WEBHOOK_URL, json=payload)
+# --- Bot 優先通知 ------------------------------------------------------------
 
-    if response.status_code in (401, 404):
-        print("[ERROR] Webhook が無効です")
-        return
+def send_bot_message(title, embeds):
+    url = f"https://discord.com/api/v10/channels/{CHANNEL_ID}/messages"
+    headers = {
+        "Authorization": f"Bot {BOT_TOKEN}"
+    }
+    data = {
+        "content": title,
+        "embeds": embeds
+    }
+    r = requests.post(url, headers=headers, json=data)
+    return r.json()  # message_id を返す
 
-    if response.status_code == 429:
-        retry = response.json().get("retry_after", 1000) / 1000
-        print(f"[WARN] Discord 429 → {retry}秒待機")
-        time.sleep(retry)
-        response = requests.post(WEBHOOK_URL, json=payload)
 
-    response.raise_for_status()
+# --- ピン止め ---------------------------------------------------------------
+
+def pin_message(message_id):
+    url = f"https://discord.com/api/v10/channels/{CHANNEL_ID}/pins/{message_id}"
+    headers = {
+        "Authorization": f"Bot {BOT_TOKEN}"
+    }
+    requests.put(url, headers=headers)
