@@ -9,7 +9,6 @@ session = cloudscraper.create_scraper()
 def fetch_items(priority_only=False):
     url = "https://skima.jp/item-list"
 
-    # --- リトライ付き取得 ---
     for attempt in range(3):
         try:
             html = session.get(url, timeout=10).text
