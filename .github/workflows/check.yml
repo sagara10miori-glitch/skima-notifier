@@ -2,8 +2,12 @@ name: SKIMA Notifier
 
 on:
   schedule:
-    - cron: "*/5 * * * *"   # 5分ごと
+    - cron: "*/5 * * * *"
   workflow_dispatch:
+
+concurrency:
+  group: skima-notifier
+  cancel-in-progress: false
 
 jobs:
   run:
@@ -36,6 +40,8 @@ jobs:
       - name: Run notifier
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
         run: |
           python main.py
 
@@ -43,6 +49,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add seen.json
-          git commit -m "Update seen.json" || echo "No changes"
+          git add seen.json last_pin.json
+          git commit -m "Update state files" || echo "No changes"
           git push
