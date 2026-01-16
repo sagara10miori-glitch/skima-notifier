@@ -48,6 +48,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add seen.json last_pin.json
+          git add seen.db last_pin.json
           git commit -m "Update state files" || echo "No changes"
           git push
