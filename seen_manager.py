@@ -1,16 +1,17 @@
-# seen_manager.py
-
 import json
 
 def load_seen_ids():
     try:
-        with open("seen.json", "r", encoding="utf-8") as f:
+        with open("seen.json", "r") as f:
             return set(json.load(f))
     except:
         return set()
 
-def save_seen_ids(ids):
-    ids = sorted(set(ids))[-500:]
 
-    with open("seen.json", "w", encoding="utf-8") as f:
-        json.dump(ids, f, ensure_ascii=False, indent=2)
+def save_seen_ids(seen):
+    # 半年以上前の ID を削除（肥大化防止）
+    if len(seen) > 50000:
+        seen = set(list(seen)[-30000:])
+
+    with open("seen.json", "w") as f:
+        json.dump(list(seen), f)
