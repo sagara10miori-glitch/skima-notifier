@@ -28,24 +28,23 @@ def determine_title(top_label):
     return "📝SKIMA 新着通知"
 
 
-def safe_top_label(embed):
-    for f in embed.get("fields", []):
-        if f["name"] == "優先度":
-            return f["value"]
-    return ""
+def safe_top_label(item):
+    return item.get("rank", "")
 
 
 def main():
     now = datetime.now(ZoneInfo("Asia/Tokyo"))
+    is_night = 1 <= now.hour < 6
 
     # SQLiteから既存IDを読み込み
     seen = load_seen_ids()
 
     # 深夜帯は優先通知だけ fetch して高速化
-    items = fetch_items(priority_only=(1 <= now.hour < 6))
+    items = fetch_items(priority_only=is_night)
 
     new_items = []
 
+    # --- 新規アイテム抽出 ---
     for item in items:
         if item["id"] in seen:
             continue
@@ -57,14 +56,12 @@ def main():
         item["score"] = calculate_score(item["price"])
         new_items.append(item)
 
-        # 新規IDをSQLiteに記録
-        mark_seen(item["id"])
-
     if not new_items:
         print("新規なし")
         cleanup_old_entries()
         return
 
+    # --- 優先 / 通常 に分類 ---
     priority_items = [i for i in new_items if i["author_id"] in PRIORITY_USERS]
     normal_items = [i for i in new_items if i["author_id"] not in PRIORITY_USERS]
 
@@ -72,31 +69,35 @@ def main():
     if priority_items:
         priority_items.sort(key=lambda x: -x["score"])
 
-        embeds = []
-        for item in priority_items[:10]:
-            embed = build_embed(item, is_priority=True)
-            embeds.append(embed)
+        embeds = [build_embed(item, is_priority=True) for item in priority_items[:10]]
 
+        # 既存ピン解除
         last = load_last_pin()
         if last:
             unpin_message(last["id"])
 
+        # 新規優先通知
         msg = send_bot_message("@everyone\n💌SKIMA 優先通知", embeds)
 
+        # ピン固定
         if "id" in msg:
             pin_message(msg["id"])
             save_last_pin(msg["id"])
 
     # --- 通常通知（深夜帯はスキップ） ---
-    if not (1 <= now.hour < 6):
-        if normal_items:
-            normal_items.sort(key=lambda x: -x["score"])
-            embeds = [build_embed(item) for item in normal_items[:10]]
+    if not is_night and normal_items:
+        normal_items.sort(key=lambda x: -x["score"])
+        embeds = [build_embed(item) for item in normal_items[:10]]
 
-            top_label = safe_top_label(embeds[0])
-            title = determine_title(top_label)
+        # タイトル判定（安全版）
+        top_label = safe_top_label(normal_items[0])
+        title = determine_title(top_label)
 
-            send_webhook_message(title, embeds)
+        send_webhook_message(title, embeds)
+
+    # --- 通知成功後に seen を更新（重要） ---
+    for item in new_items:
+        mark_seen(item["id"])
 
     # --- 1週間より古いIDを削除 ---
     cleanup_old_entries()
