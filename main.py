@@ -113,6 +113,7 @@ def main():
             top_label = safe_top_label(embeds[0])
             title = determine_title(top_label)
 
+            # ★ 通常通知は @everyone を付けない
             send_webhook_message(title, embeds)
 
     # --- seen.json 更新 ------------------------------------------------------
