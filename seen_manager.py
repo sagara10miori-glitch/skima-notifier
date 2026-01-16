@@ -1,17 +1,32 @@
 import json
+import time
+
+SEEN_FILE = "seen.json"
+KEEP_DAYS = 7
+KEEP_SECONDS = KEEP_DAYS * 24 * 60 * 60
+
 
 def load_seen_ids():
     try:
-        with open("seen.json", "r") as f:
-            return set(json.load(f))
+        with open(SEEN_FILE, "r") as f:
+            return json.load(f)  # {id: timestamp}
     except:
-        return set()
+        return {}
 
 
-def save_seen_ids(seen):
-    # 半年以上前の ID を削除（肥大化防止）
-    if len(seen) > 50000:
-        seen = set(list(seen)[-30000:])
+def save_seen_ids(seen_dict):
+    now = time.time()
 
-    with open("seen.json", "w") as f:
-        json.dump(list(seen), f)
+    # 1週間より古いIDを削除
+    cleaned = {
+        item_id: ts
+        for item_id, ts in seen_dict.items()
+        if now - ts <= KEEP_SECONDS
+    }
+
+    with open(SEEN_FILE, "w") as f:
+        json.dump(cleaned, f)
+
+
+def mark_seen(seen_dict, item_id):
+    seen_dict[item_id] = time.time()
