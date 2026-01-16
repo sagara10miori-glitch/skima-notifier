@@ -1,0 +1,62 @@
+name: Auto Update Dependencies (PR)
+
+on:
+  schedule:
+    - cron: "0 18 * * 1"   # 毎週月曜18時（日本時間3時）
+  workflow_dispatch:
+
+jobs:
+  update-deps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Update requirements.txt
+        run: |
+          python scripts/update_requirements.py
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add requirements.txt
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.git-check.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Update dependencies"
+          title: "🔄 Update Python dependencies"
+          body: |
+            自動更新された依存パッケージです。
+            - requirements.txt を最新化しました
+            - Python 3.12 対応
+          labels: dependencies
+          branch: auto/update-deps
+          delete-branch: true
+
+      - name: Auto-merge PR
+        if: steps.git-check.outputs.changed == 'true'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.create-pull-request.outputs.pull-request-number }}
+          merge-method: squash
