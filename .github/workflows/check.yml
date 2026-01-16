@@ -17,35 +17,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip"
           cache-dependency-path: |
             requirements.txt
 
-      - name: Random delay to avoid conflicts
+      - name: Random delay
         run: |
           delay=$(( RANDOM % 5 ))
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run notifier
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
-        run: |
-          python main.py
+        run: python main.py
 
-      - name: Save seen.json
+      - name: Save state files
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
