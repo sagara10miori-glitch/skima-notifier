@@ -4,7 +4,6 @@ import re
 import time
 
 session = cloudscraper.create_scraper()
-
 URL = "https://skima.jp/item-list"
 
 
