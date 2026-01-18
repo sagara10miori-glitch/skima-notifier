@@ -14,7 +14,7 @@ def safe_post(url, headers=None, json_data=None):
     if not url:
         return None
 
-    for _ in range(2):
+    for _ in range(3):
         r = requests.post(url, headers=headers, json=json_data)
         if 200 <= r.status_code < 300:
             return r
