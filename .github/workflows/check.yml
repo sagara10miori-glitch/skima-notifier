@@ -30,7 +30,7 @@ jobs:
 
       - name: Random delay
         run: |
-          delay=$(( RANDOM % 5 ))
+          delay=$(( RANDOM % 3 ))
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
@@ -48,6 +48,11 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add seen.db last_pin.json
-          git commit -m "Update state files" || echo "No changes"
-          git push
+
+          # 存在するファイルだけ add
+          [ -f seen.db ] && git add seen.db
+          [ -f last_pin.json ] && git add last_pin.json
+
+          # 変更があるときだけ commit/push
+          git commit -m "Update state files" || echo "No changes to commit"
+          git push || echo "Push failed (network issue?)"
