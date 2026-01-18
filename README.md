@@ -44,27 +44,24 @@ SKIMA の新着出品を自動で監視し、Discord に通知するシステム
 ## 📁 ディレクトリ構成
 
 <details>
-skima-notifier/ 
-  ├── main.py 
-  ├── fetch.py 
-  ├── notify.py 
-  ├── embed.py 
-  ├── score.py 
-  ├── utils.py
-  ├── seen_manager.py 
-  ├── seen.db 
-  ├── last_pin.json 
-  users/
-  │   ├── priority_users.txt
-  │   └── exclude_users.txt
-  ├── priority_users.txt 
-  ├── exclude_users.txt 
-  ├── config/ 
-  │   └── settings.py 
-  └── .github/ 
-      └── workflows/ 
-          ├── check.yml 
-          ├── deps-pr.yml 
-          └── security.yml
-
+skima-notifier/
+├── main.py
+├── fetch.py
+├── embed.py
+├── notify.py
+├── score.py
+├── utils.py
+├── seen_manager.py
+├── requirements.txt
+│
+├── config/
+│   └── settings.py
+│
+├── users/
+│   ├── priority_users.json
+│   └── exclude_users.json
+│
+└── .github/
+    └── workflows/
+        └── check.yml
 </details>
