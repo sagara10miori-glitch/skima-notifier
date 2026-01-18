@@ -25,10 +25,7 @@ def safe_post(url, headers=None, json_data=None):
                 return r
 
             if r.status_code == 429:
-                try:
-                    retry_after = r.json().get("retry_after", 2)
-                except Exception:
-                    retry_after = 2
+                retry_after = r.json().get("retry_after", 2)
                 time.sleep(retry_after)
                 continue
 
@@ -54,8 +51,7 @@ def send_webhook_message(title, embeds):
         return {"error": "WEBHOOK_URL not set"}
 
     data = {"content": title, "embeds": embeds}
-    r = safe_post(WEBHOOK_URL, json_data=data)
-    return _safe_json(r)
+    return _safe_json(safe_post(WEBHOOK_URL, json_data=data))
 
 
 def send_bot_message(title, embeds):
@@ -66,8 +62,7 @@ def send_bot_message(title, embeds):
     headers = {"Authorization": f"Bot {BOT_TOKEN}"}
     data = {"content": title, "embeds": embeds}
 
-    r = safe_post(url, headers=headers, json_data=data)
-    return _safe_json(r)
+    return _safe_json(safe_post(url, headers=headers, json_data=data))
 
 
 def load_last_pin():
