@@ -39,8 +39,11 @@ def main():
     # --- 既存IDを読み込み ---
     seen = load_seen_ids()
 
-    # --- 深夜帯は優先通知だけ fetch ---
+    # 深夜帯は優先通知だけ fetch して高速化
     items = fetch_items(priority_only=is_night) or []
+    
+    # ★ 取得件数をログに出す（重要）
+    print(f"Fetched {len(items)} items (night={is_night})")
 
     new_items = []
 
