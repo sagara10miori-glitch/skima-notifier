@@ -35,14 +35,15 @@ def safe_top_label(item):
 def main():
     now = datetime.now(ZoneInfo("Asia/Tokyo"))
     is_night = 1 <= now.hour < 6
+    print(f"[INFO] run at {now.isoformat()} (night={is_night})")
 
     seen = load_seen_ids()
+    print(f"[INFO] seen_ids = {len(seen)}")
 
     items = fetch_items(priority_only=is_night) or []
-    print(f"[INFO] fetched {len(items)} items (night={is_night})")
+    print(f"[INFO] fetched = {len(items)}")
 
     new_items = []
-
     for item in items:
         if item["id"] in seen:
             continue
@@ -66,7 +67,7 @@ def main():
     print(f"[INFO] priority_items = {len(priority_items)}")
     print(f"[INFO] normal_items = {len(normal_items)}")
 
-    # --- 優先通知（@everyone 付き） ---
+    # 優先通知（@everyone 付き）
     if priority_items:
         priority_items.sort(key=lambda x: -x["score"])
         embeds = [build_embed(item, is_priority=True) for item in priority_items[:10]]
@@ -76,12 +77,13 @@ def main():
             unpin_message(last["id"])
 
         msg = send_bot_message("@everyone\n💌SKIMA 優先通知", embeds)
+        print(f"[INFO] priority send result: {msg}")
 
         if isinstance(msg, dict) and "id" in msg:
             pin_message(msg["id"])
             save_last_pin(msg["id"])
 
-    # --- 通常通知（@everyone なし） ---
+    # 通常通知（@everyone なし）
     if not is_night and normal_items:
         normal_items.sort(key=lambda x: -x["score"])
         embeds = [build_embed(item) for item in normal_items[:10]]
@@ -89,12 +91,14 @@ def main():
         top_label = safe_top_label(normal_items[0])
         title = determine_title(top_label)
 
-        send_webhook_message(title, embeds)
+        res = send_webhook_message(title, embeds)
+        print(f"[INFO] normal send result: {res}")
 
     for item in new_items:
         mark_seen(item["id"])
 
-    cleanup_old_entries()
+    deleted = cleanup_old_entries()
+    print(f"[INFO] cleanup_old_entries: deleted={deleted}")
 
 
 if __name__ == "__main__":
