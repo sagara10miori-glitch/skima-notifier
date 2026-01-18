@@ -36,11 +36,11 @@ def main():
     now = datetime.now(ZoneInfo("Asia/Tokyo"))
     is_night = 1 <= now.hour < 6
 
-    # SQLiteから既存IDを読み込み
+    # --- 既存IDを読み込み ---
     seen = load_seen_ids()
 
-    # 深夜帯は優先通知だけ fetch して高速化
-    items = fetch_items(priority_only=is_night)
+    # --- 深夜帯は優先通知だけ fetch ---
+    items = fetch_items(priority_only=is_night) or []
 
     new_items = []
 
@@ -62,25 +62,24 @@ def main():
         return
 
     # --- 優先 / 通常 に分類 ---
-    priority_items = [i for i in new_items if i["author_id"] in PRIORITY_USERS]
-    normal_items = [i for i in new_items if i["author_id"] not in PRIORITY_USERS]
+    priority_items = [i for i in new_items if i.get("author_id") in PRIORITY_USERS]
+    normal_items = [i for i in new_items if i.get("author_id") not in PRIORITY_USERS]
 
     # --- 優先通知（深夜帯でも送信） ---
     if priority_items:
         priority_items.sort(key=lambda x: -x["score"])
-
         embeds = [build_embed(item, is_priority=True) for item in priority_items[:10]]
 
         # 既存ピン解除
         last = load_last_pin()
-        if last:
+        if last and "id" in last:
             unpin_message(last["id"])
 
         # 新規優先通知
         msg = send_bot_message("@everyone\n💌SKIMA 優先通知", embeds)
 
-        # ピン固定
-        if "id" in msg:
+        # ピン固定（msg が dict で id がある場合のみ）
+        if isinstance(msg, dict) and "id" in msg:
             pin_message(msg["id"])
             save_last_pin(msg["id"])
 
@@ -89,17 +88,16 @@ def main():
         normal_items.sort(key=lambda x: -x["score"])
         embeds = [build_embed(item) for item in normal_items[:10]]
 
-        # タイトル判定（安全版）
         top_label = safe_top_label(normal_items[0])
         title = determine_title(top_label)
 
         send_webhook_message(title, embeds)
 
-    # --- 通知成功後に seen を更新（重要） ---
+    # --- 通知成功後に seen を更新 ---
     for item in new_items:
         mark_seen(item["id"])
 
-    # --- 1週間より古いIDを削除 ---
+    # --- 古いIDを削除 ---
     cleanup_old_entries()
 
 
