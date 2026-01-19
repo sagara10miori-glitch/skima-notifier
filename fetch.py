@@ -3,9 +3,8 @@ from bs4 import BeautifulSoup
 import re
 import time
 
-URL = "https://skima.jp/dl/search"
+URL = "https://skima.jp/item-list"
 
-# 安全な一般ブラウザの User-Agent（偽装ではなく互換性のための設定）
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -19,14 +18,17 @@ HEADERS = {
 def fetch_items(priority_only=False):
     html = None
 
+    # Cloudflare に優しい控えめなリトライ
     for attempt in range(2):
         try:
             r = requests.get(URL, headers=HEADERS, timeout=10)
             if r.status_code == 200:
                 html = r.text
                 break
+
             print(f"[WARN] fetch status={r.status_code}")
             time.sleep(2 + attempt)
+
         except Exception as e:
             print(f"[WARN] fetch exception: {e}")
             time.sleep(2)
@@ -38,7 +40,7 @@ def fetch_items(priority_only=False):
     soup = BeautifulSoup(html, "lxml")
     items = []
 
-    # 新しい SKIMA の商品カード構造
+    # 新 UI の商品カードは <li> 内に <div class="inner">
     for li in soup.select("li"):
         inner = li.select_one(".inner")
         if not inner:
@@ -60,6 +62,11 @@ def fetch_items(priority_only=False):
         # URL
         url = "https://skima.jp" + title_tag.get("href") if title_tag else ""
 
+        # ID（detail?id=xxxx から抽出）
+        item_id = None
+        if url and "id=" in url:
+            item_id = url.split("id=")[-1]
+
         # 作者
         author_tag = inner.select_one(".username a")
         author_name = author_tag.get_text(strip=True) if author_tag else "不明"
@@ -70,15 +77,15 @@ def fetch_items(priority_only=False):
             if "id=" in href:
                 author_id = href.split("id=")[-1]
 
-        # ランク（SKIMA 新UIでは存在しない可能性あり）
+        # 新 UI では rank が存在しないので固定
         rank = "通常"
 
-        # 深夜帯フィルタ
+        # 深夜帯フィルタ（優先ユーザーのみ通知）
         if priority_only and rank not in ("🔥特選", "✨おすすめ"):
             continue
 
         items.append({
-            "id": url.split("=")[-1],  # detail?id=xxxx から取得
+            "id": item_id,
             "title": title,
             "price": price,
             "author_id": author_id,
