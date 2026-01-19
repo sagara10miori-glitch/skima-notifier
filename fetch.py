@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import time
 
-URL = "https://skima.jp/item-list"
+URL = "https://skima.jp/dl/search"
 
 # 安全な一般ブラウザの User-Agent（偽装ではなく互換性のための設定）
 HEADERS = {
