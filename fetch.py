@@ -1,38 +1,40 @@
-import cloudscraper
+import requests
 from bs4 import BeautifulSoup
 import re
 import time
 
-session = cloudscraper.create_scraper(
-    browser={
-        "browser": "chrome",
-        "platform": "windows",
-        "mobile": False
-    }
-)
+URL = "https://skima.jp/item-list"
 
-session.headers.update({
+# 安全な一般ブラウザの User-Agent（偽装ではなく互換性のための設定）
+HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/120.0.0.0 Safari/537.36"
-    )
-})
-
-URL = "https://skima.jp/item-list"
+    ),
+    "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+}
 
 
 def fetch_items(priority_only=False):
     html = None
 
-    for attempt in range(3):
+    # Cloudflare に優しい控えめなリトライ（最大2回）
+    for attempt in range(2):
         try:
-            r = session.get(URL, timeout=10)
+            r = requests.get(URL, headers=HEADERS, timeout=10)
+
+            # Cloudflare のブロック（403/503）は突破しない
             if r.status_code == 200:
                 html = r.text
                 break
-        except Exception:
-            time.sleep(1.5 * (attempt + 1))
+
+            print(f"[WARN] fetch status={r.status_code}")
+            time.sleep(2 + attempt)
+
+        except Exception as e:
+            print(f"[WARN] fetch exception: {e}")
+            time.sleep(2)
 
     if not html:
         print("[WARN] failed to fetch item-list")
@@ -72,6 +74,7 @@ def fetch_items(priority_only=False):
             link_tag = card.select_one("a")
             url = "https://skima.jp" + link_tag.get("href") if link_tag else ""
 
+            # 深夜帯の高速化
             if priority_only and rank not in ("🔥特選", "✨おすすめ"):
                 continue
 
