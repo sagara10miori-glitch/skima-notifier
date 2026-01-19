@@ -3,7 +3,13 @@ from bs4 import BeautifulSoup
 import re
 import time
 
-session = cloudscraper.create_scraper()
+session = cloudscraper.create_scraper(
+    browser={
+        "browser": "chrome",
+        "platform": "windows",
+        "mobile": False
+    }
+)
 URL = "https://skima.jp/item-list"
 
 
