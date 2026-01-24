@@ -67,7 +67,7 @@ def fetch_items(priority_only=False):
         if url and "id=" in url:
             item_id = url.split("id=")[-1]
 
-        # 作者（class が変わっても確実に拾えるように強化）
+        # 作者（class が変わっても確実に拾える）
         author_tag = inner.select_one("a[href*='profile']")
         author_name = author_tag.get_text(strip=True) if author_tag else "不明"
 
