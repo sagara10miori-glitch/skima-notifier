@@ -1,14 +1,3 @@
-import json
-
-# ⭐注目ユーザー
-with open("highlight_users.json", "r", encoding="utf-8") as f:
-    HIGHLIGHT_USERS = set(json.load(f))
-
-# 💌優先ユーザー
-with open("priority_users.json", "r", encoding="utf-8") as f:
-    PRIORITY_USERS = set(json.load(f))
-
-
 def build_embed(item):
     title = item["title"]
     price = item["price"]
@@ -23,27 +12,41 @@ def build_embed(item):
     prefix = ""
     color = 0x66CCFF  # 通常：水色
 
-    if author_id in PRIORITY_USERS:
+    # ① 優先ユーザー（author_id が PRIORITY_USERS に含まれるかどうかは main.py 側で判定）
+    if item.get("is_priority"):
         prefix = "💌優先"
         color = 0xFF66AA  # ピンク
+
+    # ② タイトルに🔥（最優先の特選）
     elif "🔥" in title:
         prefix = "🔥特選"
         color = 0xFF4444  # 赤
-    elif author_id in HIGHLIGHT_USERS:
+
+    # ③ 価格で特選（3000円以下）
+    elif price <= 3000:
+        prefix = "🔥特選"
+        color = 0xFF4444  # 赤
+
+    # ④ 価格で注目（5000円以下）
+    elif price <= 5000:
         prefix = "⭐注目"
         color = 0xFFDD33  # 黄色
-    elif "✨" in title:
+
+    # ⑤ 価格でおすすめ（10000円以下）
+    elif price <= 10000:
         prefix = "✨おすすめ"
         color = 0xF28C28  # オレンジ
 
-    if prefix:
-        title = f"{prefix} {title}"
+    # ⑥ 通常
+    else:
+        prefix = ""
+        color = 0x66CCFF  # 水色
 
-    # -----------------------------
-    # Gyazo時代のUIを再現したEmbed
-    # -----------------------------
+    # prefix をタイトルに付ける
+    final_title = f"{prefix} {title}" if prefix else title
+
     embed = {
-        "title": title,
+        "title": final_title,
         "url": url,
         "color": color,
         "fields": [
@@ -63,4 +66,4 @@ def build_embed(item):
         }
     }
 
-    return embed
+    return embed, prefix
