@@ -11,10 +11,16 @@ from notify import (
 )
 from seen_manager import SeenManager
 from config.settings import (
-    PRIORITY_USERS_FILE,
-    EXCLUDE_USERS_FILE,
+    PRIORITY_USERS_PATH,
+    EXCLUDE_USERS_PATH,
     PRICE_LIMIT,
 )
+
+with open(PRIORITY_USERS_PATH, "r", encoding="utf-8") as f:
+    PRIORITY_USERS = set(json.load(f))
+
+with open(EXCLUDE_USERS_PATH, "r", encoding="utf-8") as f:
+    EXCLUDE_USERS = set(json.load(f))
 
 import json
 
