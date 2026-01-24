@@ -67,8 +67,8 @@ def fetch_items(priority_only=False):
         if url and "id=" in url:
             item_id = url.split("id=")[-1]
 
-        # 作者
-        author_tag = inner.select_one(".username a")
+        # 作者（class が変わっても確実に拾えるように強化）
+        author_tag = inner.select_one("a[href*='profile']")
         author_name = author_tag.get_text(strip=True) if author_tag else "不明"
 
         author_id = None
@@ -77,8 +77,13 @@ def fetch_items(priority_only=False):
             if "id=" in href:
                 author_id = href.split("id=")[-1]
 
-        # 新 UI では rank が存在しないので固定
-        rank = "通常"
+        # rank（新 UI では消えたのでタイトルの絵文字で判定）
+        if "🔥" in title:
+            rank = "🔥特選"
+        elif "✨" in title:
+            rank = "✨おすすめ"
+        else:
+            rank = "通常"
 
         # 深夜帯フィルタ（優先ユーザーのみ通知）
         if priority_only and rank not in ("🔥特選", "✨おすすめ"):
