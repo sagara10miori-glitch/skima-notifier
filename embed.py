@@ -1,33 +1,66 @@
-def build_embed(item, is_priority=False):
-    # --- 色決定（高速 & 明確化） ---
-    if is_priority:
-        color = 0xFFD700  # ゴールド
-    else:
-        rank = item.get("rank")
-        color = (
-            0xFF5555 if rank == "🔥特選" else
-            0xFFAA00 if rank == "✨おすすめ" else
-            0x00AAFF
-        )
+import json
 
-    # --- タイトル（Discord 256文字制限） ---
-    title = (item.get("title") or "")[:256]
+# ⭐注目ユーザー
+with open("highlight_users.json", "r", encoding="utf-8") as f:
+    HIGHLIGHT_USERS = set(json.load(f))
 
-    # --- 画像（None の場合は付けない） ---
-    image_url = item.get("image")
+# 💌優先ユーザー
+with open("priority_users.json", "r", encoding="utf-8") as f:
+    PRIORITY_USERS = set(json.load(f))
 
+
+def build_embed(item):
+    title = item["title"]
+    price = item["price"]
+    author = item["author_name"]
+    url = item["url"]
+    image = item["image"]
+    author_id = item["author_id"]
+
+    # -----------------------------
+    # ランク判定（あなたの優先度順）
+    # -----------------------------
+    prefix = ""
+    color = 0x66CCFF  # 通常：水色
+
+    if author_id in PRIORITY_USERS:
+        prefix = "💌優先"
+        color = 0xFF66AA  # ピンク
+    elif "🔥" in title:
+        prefix = "🔥特選"
+        color = 0xFF4444  # 赤
+    elif author_id in HIGHLIGHT_USERS:
+        prefix = "⭐注目"
+        color = 0xFFDD33  # 黄色
+    elif "✨" in title:
+        prefix = "✨おすすめ"
+        color = 0xF28C28  # オレンジ
+
+    if prefix:
+        title = f"{prefix} {title}"
+
+    # -----------------------------
+    # Gyazo時代のUIを再現したEmbed
+    # -----------------------------
     embed = {
         "title": title,
-        "url": item.get("url") or "",
+        "url": url,
         "color": color,
         "fields": [
-            {"name": "価格", "value": f"{item.get('price', 0)}円"},
-            {"name": "優先度", "value": item.get("rank") or "不明"},
-            {"name": "作者", "value": item.get("author_name") or "不明"},
+            {
+                "name": "価格",
+                "value": f"**¥{price:,}**",
+                "inline": True
+            },
+            {
+                "name": "作者",
+                "value": author,
+                "inline": True
+            }
         ],
+        "image": {
+            "url": image
+        }
     }
-
-    if image_url:
-        embed["image"] = {"url": image_url}
 
     return embed
