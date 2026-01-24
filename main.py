@@ -1,9 +1,12 @@
 import datetime
 import pytz
+import json   # ← これが必要！
+
 from fetch import fetch_items
 from embed import build_embed
 from notify import (
     send_webhook_message,
+    send_bot_message,
     load_last_pin,
     save_last_pin,
     unpin_message,
