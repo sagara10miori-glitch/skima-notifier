@@ -21,9 +21,11 @@ def safe_post(url, headers=None, json_data=None):
             r = requests.post(url, headers=headers, json=json_data, timeout=10)
             last_response = r
 
+            # 成功（200〜299）
             if 200 <= r.status_code < 300:
                 return r
 
+            # レートリミット
             if r.status_code == 429:
                 retry_after = r.json().get("retry_after", 2)
                 time.sleep(retry_after)
@@ -40,10 +42,15 @@ def safe_post(url, headers=None, json_data=None):
 def _safe_json(r):
     if not r:
         return {"error": "request failed"}
+
+    # 204 No Content は成功扱い
+    if r.status_code == 204:
+        return {"status": "success", "code": 204}
+
     try:
         return r.json()
     except Exception:
-        return {"error": f"invalid response: {r.status_code}"}
+        return {"status": "success", "code": r.status_code}
 
 
 def send_webhook_message(title, embeds):
