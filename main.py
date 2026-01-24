@@ -4,7 +4,6 @@ from fetch import fetch_items
 from embed import build_embed
 from notify import (
     send_webhook_message,
-    send_bot_message,
     load_last_pin,
     save_last_pin,
     unpin_message,
@@ -85,6 +84,9 @@ def main():
         if seen.exists(item["id"]):
             continue
 
+        # 優先ユーザー情報を embed に渡すために付与
+        item["is_priority"] = item["author_id"] in PRIORITY_USERS
+
         new_items.append(item)
 
     print(f"[INFO] new_items = {len(new_items)}")
@@ -128,7 +130,7 @@ def main():
     content = "@everyone " + header_text if needs_everyone(prefixes) else header_text
 
     # ---------------------------------------------------------
-    # 1メッセージで送信
+    # 1メッセージで送信（Webhook）
     # ---------------------------------------------------------
     result = send_webhook_message(content, embeds)
     print(f"[INFO] send result: {result}")
@@ -153,4 +155,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main)ｘｘ
