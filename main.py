@@ -1,6 +1,6 @@
 import datetime
 import pytz
-import json   # ← これが必要！
+import json
 
 from fetch import fetch_items
 from embed import build_embed
@@ -19,23 +19,14 @@ from config.settings import (
     PRICE_LIMIT,
 )
 
+# ---------------------------------------------------------
+# TXT 読み込み
+# ---------------------------------------------------------
 with open(PRIORITY_USERS_PATH, "r", encoding="utf-8") as f:
-    PRIORITY_USERS = set(json.load(f))
+    PRIORITY_USERS = {line.strip() for line in f if line.strip()}
 
 with open(EXCLUDE_USERS_PATH, "r", encoding="utf-8") as f:
-    EXCLUDE_USERS = set(json.load(f))
-
-import json
-
-
-# ---------------------------------------------------------
-# 設定読み込み
-# ---------------------------------------------------------
-with open(PRIORITY_USERS_FILE, "r", encoding="utf-8") as f:
-    PRIORITY_USERS = set(json.load(f))
-
-with open(EXCLUDE_USERS_FILE, "r", encoding="utf-8") as f:
-    EXCLUDE_USERS = set(json.load(f))
+    EXCLUDE_USERS = {line.strip() for line in f if line.strip()}
 
 
 # ---------------------------------------------------------
