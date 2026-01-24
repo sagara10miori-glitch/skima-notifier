@@ -17,16 +17,18 @@ from config.settings import (
     PRICE_LIMIT,
 )
 
+import json
+
+
 # ---------------------------------------------------------
 # 設定読み込み
 # ---------------------------------------------------------
-import json
-
 with open(PRIORITY_USERS_FILE, "r", encoding="utf-8") as f:
     PRIORITY_USERS = set(json.load(f))
 
 with open(EXCLUDE_USERS_FILE, "r", encoding="utf-8") as f:
     EXCLUDE_USERS = set(json.load(f))
+
 
 # ---------------------------------------------------------
 # メイン処理
@@ -41,8 +43,7 @@ def main():
 
     # 既読管理
     seen = SeenManager("seen.db")
-    seen_ids = seen.count()
-    print(f"[INFO] seen_ids = {seen_ids}")
+    print(f"[INFO] seen_ids = {seen.count()}")
 
     # 深夜帯は優先ユーザーのみ取得
     items = fetch_items(priority_only=night)
@@ -50,19 +51,15 @@ def main():
 
     new_items = []
     for item in items:
-        # ID が取れないものは無視
         if not item["id"]:
             continue
 
-        # 除外ユーザー
         if item["author_id"] in EXCLUDE_USERS:
             continue
 
-        # 価格フィルタ
         if item["price"] >= PRICE_LIMIT:
             continue
 
-        # 既読チェック
         if seen.exists(item["id"]):
             continue
 
@@ -73,14 +70,12 @@ def main():
     # ---------------------------------------------------------
     # 優先 / 通常 に分類
     # ---------------------------------------------------------
-    priority_items = []
-    normal_items = []
-
-    for item in new_items:
-        if item["author_id"] in PRIORITY_USERS:
-            priority_items.append(item)
-        else:
-            normal_items.append(item)
+    priority_items = [
+        item for item in new_items if item["author_id"] in PRIORITY_USERS
+    ]
+    normal_items = [
+        item for item in new_items if item["author_id"] not in PRIORITY_USERS
+    ]
 
     print(f"[INFO] priority_items = {len(priority_items)}")
     print(f"[INFO] normal_items = {len(normal_items)}")
