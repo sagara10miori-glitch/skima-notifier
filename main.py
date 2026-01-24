@@ -1,103 +1,120 @@
+import datetime
+import pytz
 from fetch import fetch_items
 from embed import build_embed
-from score import calculate_score
-from utils import load_user_list
-from seen_manager import load_seen_ids, mark_seen, cleanup_old_entries
 from notify import (
     send_webhook_message,
     send_bot_message,
-    pin_message,
-    unpin_message,
     load_last_pin,
-    save_last_pin
+    save_last_pin,
+    unpin_message,
+    pin_message,
 )
-from config.settings import PRIORITY_USERS_PATH, EXCLUDE_USERS_PATH
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from seen_manager import SeenManager
+from config.settings import (
+    PRIORITY_USERS_FILE,
+    EXCLUDE_USERS_FILE,
+    PRICE_LIMIT,
+)
 
+# ---------------------------------------------------------
+# 設定読み込み
+# ---------------------------------------------------------
+import json
 
-PRIORITY_USERS = load_user_list(PRIORITY_USERS_PATH)
-EXCLUDE_USERS = load_user_list(EXCLUDE_USERS_PATH)
+with open(PRIORITY_USERS_FILE, "r", encoding="utf-8") as f:
+    PRIORITY_USERS = set(json.load(f))
 
+with open(EXCLUDE_USERS_FILE, "r", encoding="utf-8") as f:
+    EXCLUDE_USERS = set(json.load(f))
 
-def determine_title(top_label):
-    if top_label == "🔥特選":
-        return "📢SKIMA 新着通知"
-    if top_label == "✨おすすめ":
-        return "🔔SKIMA 新着通知"
-    return "📝SKIMA 新着通知"
-
-
-def safe_top_label(item):
-    return item.get("rank", "")
-
-
+# ---------------------------------------------------------
+# メイン処理
+# ---------------------------------------------------------
 def main():
-    now = datetime.now(ZoneInfo("Asia/Tokyo"))
-    is_night = 1 <= now.hour < 6
-    print(f"[INFO] run at {now.isoformat()} (night={is_night})")
+    # 現在時刻（JST）
+    jst = pytz.timezone("Asia/Tokyo")
+    now = datetime.datetime.now(jst)
+    night = 1 <= now.hour <= 5
 
-    seen = load_seen_ids()
-    print(f"[INFO] seen_ids = {len(seen)}")
+    print(f"[INFO] run at {now.isoformat()} (night={night})")
 
-    items = fetch_items(priority_only=is_night) or []
+    # 既読管理
+    seen = SeenManager("seen.db")
+    seen_ids = seen.count()
+    print(f"[INFO] seen_ids = {seen_ids}")
+
+    # 深夜帯は優先ユーザーのみ取得
+    items = fetch_items(priority_only=night)
     print(f"[INFO] fetched = {len(items)}")
 
     new_items = []
     for item in items:
-        if item["id"] in seen:
-            continue
-        if item["author_id"] in EXCLUDE_USERS:
-            continue
-        if item["price"] >= 15000:
+        # ID が取れないものは無視
+        if not item["id"]:
             continue
 
-        item["score"] = calculate_score(item["price"])
+        # 除外ユーザー
+        if item["author_id"] in EXCLUDE_USERS:
+            continue
+
+        # 価格フィルタ
+        if item["price"] >= PRICE_LIMIT:
+            continue
+
+        # 既読チェック
+        if seen.exists(item["id"]):
+            continue
+
         new_items.append(item)
 
     print(f"[INFO] new_items = {len(new_items)}")
 
-    if not new_items:
-        cleanup_old_entries()
-        return
+    # ---------------------------------------------------------
+    # 優先 / 通常 に分類
+    # ---------------------------------------------------------
+    priority_items = []
+    normal_items = []
 
-    priority_items = [i for i in new_items if i.get("author_id") in PRIORITY_USERS]
-    normal_items = [i for i in new_items if i.get("author_id") not in PRIORITY_USERS]
+    for item in new_items:
+        if item["author_id"] in PRIORITY_USERS:
+            priority_items.append(item)
+        else:
+            normal_items.append(item)
 
     print(f"[INFO] priority_items = {len(priority_items)}")
     print(f"[INFO] normal_items = {len(normal_items)}")
 
-    # 優先通知（@everyone 付き）
-    if priority_items:
-        priority_items.sort(key=lambda x: -x["score"])
-        embeds = [build_embed(item, is_priority=True) for item in priority_items[:10]]
+    # ---------------------------------------------------------
+    # 通知処理
+    # ---------------------------------------------------------
+    # 優先通知（Bot）
+    for item in priority_items:
+        embeds = [build_embed(item)]
+        result = send_bot_message("@everyone", embeds)
+        print(f"[INFO] priority send result: {result}")
 
-        last = load_last_pin()
-        if last and "id" in last:
-            unpin_message(last["id"])
+        # ピン固定
+        if "id" in result:
+            last_pin = load_last_pin()
+            if last_pin:
+                unpin_message(last_pin["id"])
+            pin_message(result["id"])
+            save_last_pin(result["id"])
 
-        msg = send_bot_message("@everyone\n💌SKIMA 優先通知", embeds)
-        print(f"[INFO] priority send result: {msg}")
+        seen.add(item["id"])
 
-        if isinstance(msg, dict) and "id" in msg:
-            pin_message(msg["id"])
-            save_last_pin(msg["id"])
+    # 通常通知（Webhook）
+    for item in normal_items:
+        embeds = [build_embed(item)]
+        result = send_webhook_message("", embeds)
+        print(f"[INFO] normal send result: {result}")
+        seen.add(item["id"])
 
-    # 通常通知（@everyone なし）
-    if not is_night and normal_items:
-        normal_items.sort(key=lambda x: -x["score"])
-        embeds = [build_embed(item) for item in normal_items[:10]]
-
-        top_label = safe_top_label(normal_items[0])
-        title = determine_title(top_label)
-
-        res = send_webhook_message(title, embeds)
-        print(f"[INFO] normal send result: {res}")
-
-    for item in new_items:
-        mark_seen(item["id"])
-
-    deleted = cleanup_old_entries()
+    # ---------------------------------------------------------
+    # 古い既読データの削除
+    # ---------------------------------------------------------
+    deleted = seen.cleanup_old_entries(days=7)
     print(f"[INFO] cleanup_old_entries: deleted={deleted}")
 
 
