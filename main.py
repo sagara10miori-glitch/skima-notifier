@@ -31,6 +31,28 @@ with open(EXCLUDE_USERS_FILE, "r", encoding="utf-8") as f:
 
 
 # ---------------------------------------------------------
+# 優先度の数値化
+# ---------------------------------------------------------
+def priority_value(prefix):
+    if prefix.startswith("💌"):
+        return 1
+    if prefix.startswith("🔥"):
+        return 2
+    if prefix.startswith("⭐"):
+        return 3
+    if prefix.startswith("✨"):
+        return 4
+    return 5
+
+
+# ---------------------------------------------------------
+# @everyone が必要か
+# ---------------------------------------------------------
+def needs_everyone(prefixes):
+    return any(p.startswith("💌") or p.startswith("🔥") for p in prefixes)
+
+
+# ---------------------------------------------------------
 # メイン処理
 # ---------------------------------------------------------
 def main():
@@ -68,43 +90,60 @@ def main():
     print(f"[INFO] new_items = {len(new_items)}")
 
     # ---------------------------------------------------------
-    # 優先 / 通常 に分類
+    # embed生成（prefixも受け取る）
     # ---------------------------------------------------------
-    priority_items = [
-        item for item in new_items if item["author_id"] in PRIORITY_USERS
-    ]
-    normal_items = [
-        item for item in new_items if item["author_id"] not in PRIORITY_USERS
-    ]
+    embeds = []
+    prefixes = []
+    ids = []
 
-    print(f"[INFO] priority_items = {len(priority_items)}")
-    print(f"[INFO] normal_items = {len(normal_items)}")
+    for item in new_items:
+        embed, prefix = build_embed(item)
+        embeds.append(embed)
+        prefixes.append(prefix)
+        ids.append(item["id"])
+
+    if not embeds:
+        print("[INFO] no new embeds")
+        return
 
     # ---------------------------------------------------------
-    # 通知処理
+    # 優先度順に並べ替え
     # ---------------------------------------------------------
-    # 優先通知（Bot）
-    for item in priority_items:
-        embeds = [build_embed(item)]
-        result = send_bot_message("@everyone", embeds)
-        print(f"[INFO] priority send result: {result}")
+    sorted_data = sorted(
+        zip(embeds, prefixes, ids),
+        key=lambda x: priority_value(x[1])
+    )
 
-        # ピン固定
-        if "id" in result:
-            last_pin = load_last_pin()
-            if last_pin:
-                unpin_message(last_pin["id"])
-            pin_message(result["id"])
-            save_last_pin(result["id"])
+    embeds = [e for e, p, i in sorted_data]
+    prefixes = [p for e, p, i in sorted_data]
+    ids = [i for e, p, i in sorted_data]
 
-        seen.add(item["id"])
+    # ---------------------------------------------------------
+    # 見出しの決定
+    # ---------------------------------------------------------
+    top_prefix = prefixes[0] if prefixes else "🔔"
+    header_text = f"{top_prefix} SKIMA新着通知"
 
-    # 通常通知（Webhook）
-    for item in normal_items:
-        embeds = [build_embed(item)]
-        result = send_webhook_message("", embeds)
-        print(f"[INFO] normal send result: {result}")
-        seen.add(item["id"])
+    # @everyone 判定
+    content = "@everyone " + header_text if needs_everyone(prefixes) else header_text
+
+    # ---------------------------------------------------------
+    # 1メッセージで送信
+    # ---------------------------------------------------------
+    result = send_webhook_message(content, embeds)
+    print(f"[INFO] send result: {result}")
+
+    # ピン固定（最優先の1件のみ）
+    if "id" in result:
+        last_pin = load_last_pin()
+        if last_pin:
+            unpin_message(last_pin["id"])
+        pin_message(result["id"])
+        save_last_pin(result["id"])
+
+    # 既読登録
+    for item_id in ids:
+        seen.add(item_id)
 
     # ---------------------------------------------------------
     # 古い既読データの削除
