@@ -132,10 +132,15 @@ def main():
         zip(embeds, prefixes, ids),
         key=lambda x: priority_value(x[1])
     )
-
+    
     embeds = [e for e, p, i in sorted_data]
     prefixes = [p for e, p, i in sorted_data]
     ids = [i for e, p, i in sorted_data]
+    
+    # ★ 上位10件だけ通知する
+    embeds = embeds[:10]
+    prefixes = prefixes[:10]
+    ids = ids[:10]
 
     # ---------------------------------------------------------
     # 見出しの決定（絵文字のみ）
