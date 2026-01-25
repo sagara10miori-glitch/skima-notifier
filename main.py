@@ -45,10 +45,25 @@ def priority_value(prefix):
 
 
 # ---------------------------------------------------------
-# @everyone が必要か
+# 絵文字だけ返す
+# ---------------------------------------------------------
+def prefix_emoji(prefix):
+    if prefix.startswith("💌"):
+        return "💌"
+    if prefix.startswith("🔥"):
+        return "🔥"
+    if prefix.startswith("⭐"):
+        return "⭐"
+    if prefix.startswith("✨"):
+        return "✨"
+    return "🔔"
+
+
+# ---------------------------------------------------------
+# @everyone は 💌 のときだけ
 # ---------------------------------------------------------
 def needs_everyone(prefixes):
-    return any(p.startswith("💌") or p.startswith("🔥") for p in prefixes)
+    return any(p.startswith("💌") for p in prefixes)
 
 
 # ---------------------------------------------------------
@@ -121,12 +136,14 @@ def main():
     ids = [i for e, p, i in sorted_data]
 
     # ---------------------------------------------------------
-    # 見出しの決定
+    # 見出しの決定（絵文字のみ）
     # ---------------------------------------------------------
-    top_prefix = prefixes[0] if prefixes else "🔔"
-    header_text = f"{top_prefix} SKIMA新着通知"
+    top_prefix = prefixes[0] if prefixes else ""
+    emoji = prefix_emoji(top_prefix)
 
-    # @everyone 判定
+    header_text = f"{emoji} SKIMA新着通知"
+
+    # @everyone は 💌 のときだけ
     content = "@everyone " + header_text if needs_everyone(prefixes) else header_text
 
     # ---------------------------------------------------------
