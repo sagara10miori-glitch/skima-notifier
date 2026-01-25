@@ -151,21 +151,25 @@ def main():
     # ---------------------------------------------------------
     result = send_webhook_message(content, embeds)
     print(f"[INFO] send result: {result}")
-
-    # ピン固定
+    
+    # ---------------------------------------------------------
+    # 送信成功時のみピン固定 & 既読登録
+    # ---------------------------------------------------------
     if "id" in result:
+        # ピン固定
         last_pin = load_last_pin()
         if last_pin:
             unpin_message(last_pin["id"])
         pin_message(result["id"])
         save_last_pin(result["id"])
-
-    # 既読登録
-    for item_id in ids:
-        seen.add(item_id)
-
-    deleted = seen.cleanup_old_entries(days=7)
-    print(f"[INFO] cleanup_old_entries: deleted={deleted}")
+    
+        # 既読登録（成功時のみ）
+        for item_id in ids:
+            seen.add(item_id)
+    
+        print("[INFO] seen updated (send success)")
+    else:
+        print("[WARN] send failed → seen not updated")
 
 
 if __name__ == "__main__":
