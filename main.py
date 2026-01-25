@@ -87,22 +87,29 @@ def main():
 
     new_items = []
     for item in items:
-        if not item["id"]:
-            continue
+    if not item["id"]:
+        continue
 
-        if item["author_id"] in EXCLUDE_USERS:
-            continue
+    # 除外ユーザー
+    if item["author_id"] in EXCLUDE_USERS:
+        continue
 
-        if item["price"] >= PRICE_LIMIT:
-            continue
+    # 価格上限
+    if item["price"] >= PRICE_LIMIT:
+        continue
 
-        if seen.exists(item["id"]):
-            continue
+    # 既読
+    if seen.exists(item["id"]):
+        continue
 
-        # 優先ユーザー情報を embed に渡すために付与
-        item["is_priority"] = item["author_id"] in PRIORITY_USERS
+    # 🔥 タイトルに「アイコン」を含むものは通知しない
+    if "アイコン" in item["title"]:
+        continue
 
-        new_items.append(item)
+    # 優先ユーザー情報を embed に渡すために付与
+    item["is_priority"] = item["author_id"] in PRIORITY_USERS
+
+    new_items.append(item)
 
     print(f"[INFO] new_items = {len(new_items)}")
 
