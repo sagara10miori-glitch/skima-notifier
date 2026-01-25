@@ -86,7 +86,7 @@ def main():
     print(f"[INFO] fetched = {len(items)}")
 
     new_items = []
-    for item in items:
+for item in items:
     if not item["id"]:
         continue
 
@@ -102,7 +102,7 @@ def main():
     if seen.exists(item["id"]):
         continue
 
-    # 🔥 タイトルに「アイコン」を含むものは通知しない
+    # タイトルに「アイコン」を含むものは通知しない
     if "アイコン" in item["title"]:
         continue
 
@@ -110,7 +110,7 @@ def main():
     item["is_priority"] = item["author_id"] in PRIORITY_USERS
 
     new_items.append(item)
-
+    
     print(f"[INFO] new_items = {len(new_items)}")
 
     # ---------------------------------------------------------
