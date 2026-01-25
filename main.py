@@ -132,12 +132,14 @@ def main():
         zip(embeds, prefixes, ids),
         key=lambda x: priority_value(x[1])
     )
-    
+
     embeds = [e for e, p, i in sorted_data]
     prefixes = [p for e, p, i in sorted_data]
     ids = [i for e, p, i in sorted_data]
-    
-    # ★ 上位10件だけ通知する
+
+    # ---------------------------------------------------------
+    # ★ 上位10件だけ通知する（Discord の embed 制限）
+    # ---------------------------------------------------------
     embeds = embeds[:10]
     prefixes = prefixes[:10]
     ids = ids[:10]
@@ -152,26 +154,24 @@ def main():
     content = "@everyone " + header_text if needs_everyone(prefixes) else header_text
 
     # ---------------------------------------------------------
-    # 1メッセージで送信（Webhook）
+    # 送信
     # ---------------------------------------------------------
     result = send_webhook_message(content, embeds)
     print(f"[INFO] send result: {result}")
-    
+
     # ---------------------------------------------------------
     # 送信成功時のみピン固定 & 既読登録
     # ---------------------------------------------------------
     if "id" in result:
-        # ピン固定
         last_pin = load_last_pin()
         if last_pin:
             unpin_message(last_pin["id"])
         pin_message(result["id"])
         save_last_pin(result["id"])
-    
-        # 既読登録（成功時のみ）
+
         for item_id in ids:
             seen.add(item_id)
-    
+
         print("[INFO] seen updated (send success)")
     else:
         print("[WARN] send failed → seen not updated")
