@@ -86,35 +86,30 @@ def main():
     print(f"[INFO] fetched = {len(items)}")
 
     new_items = []
-for item in items:
-    if not item["id"]:
-        continue
+    for item in items:
+        if not item["id"]:
+            continue
 
-    # 除外ユーザー
-    if item["author_id"] in EXCLUDE_USERS:
-        continue
+        if item["author_id"] in EXCLUDE_USERS:
+            continue
 
-    # 価格上限
-    if item["price"] >= PRICE_LIMIT:
-        continue
+        if item["price"] >= PRICE_LIMIT:
+            continue
 
-    # 既読
-    if seen.exists(item["id"]):
-        continue
+        if seen.exists(item["id"]):
+            continue
 
-    # タイトルに「アイコン」を含むものは通知しない
-    if "アイコン" in item["title"]:
-        continue
+        # タイトルに「アイコン」を含むものは通知しない
+        if "アイコン" in item["title"]:
+            continue
 
-    # 優先ユーザー情報を embed に渡すために付与
-    item["is_priority"] = item["author_id"] in PRIORITY_USERS
+        item["is_priority"] = item["author_id"] in PRIORITY_USERS
+        new_items.append(item)
 
-    new_items.append(item)
-    
     print(f"[INFO] new_items = {len(new_items)}")
 
     # ---------------------------------------------------------
-    # embed生成（prefixも受け取る）
+    # embed生成
     # ---------------------------------------------------------
     embeds = []
     prefixes = []
@@ -149,8 +144,6 @@ for item in items:
     emoji = prefix_emoji(top_prefix)
 
     header_text = f"{emoji} SKIMA新着通知"
-
-    # @everyone は 💌 のときだけ
     content = "@everyone " + header_text if needs_everyone(prefixes) else header_text
 
     # ---------------------------------------------------------
@@ -159,7 +152,7 @@ for item in items:
     result = send_webhook_message(content, embeds)
     print(f"[INFO] send result: {result}")
 
-    # ピン固定（最優先の1件のみ）
+    # ピン固定
     if "id" in result:
         last_pin = load_last_pin()
         if last_pin:
@@ -171,9 +164,6 @@ for item in items:
     for item_id in ids:
         seen.add(item_id)
 
-    # ---------------------------------------------------------
-    # 古い既読データの削除
-    # ---------------------------------------------------------
     deleted = seen.cleanup_old_entries(days=7)
     print(f"[INFO] cleanup_old_entries: deleted={deleted}")
 
