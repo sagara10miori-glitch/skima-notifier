@@ -4,7 +4,6 @@ def build_embed(item):
     author = item["author_name"]
     url = item["url"]
     image = item["image"]
-    author_id = item["author_id"]
 
     # -----------------------------
     # ランク判定（あなたの優先度順）
@@ -12,12 +11,12 @@ def build_embed(item):
     prefix = ""
     color = 0x66CCFF  # 通常：水色
 
-    # ① 優先ユーザー（author_id が PRIORITY_USERS に含まれるかどうかは main.py 側で判定）
+    # ① 優先ユーザー
     if item.get("is_priority"):
         prefix = "💌優先"
         color = 0xFF66AA  # ピンク
 
-    # ② タイトルに🔥（最優先の特選）
+    # ② タイトルに🔥
     elif "🔥" in title:
         prefix = "🔥特選"
         color = 0xFF4444  # 赤
@@ -25,31 +24,43 @@ def build_embed(item):
     # ③ 価格で特選（3000円以下）
     elif price <= 3000:
         prefix = "🔥特選"
-        color = 0xFF4444  # 赤
+        color = 0xFF4444
 
     # ④ 価格で注目（5000円以下）
     elif price <= 5000:
         prefix = "⭐注目"
-        color = 0xFFDD33  # 黄色
+        color = 0xFFDD33
 
     # ⑤ 価格でおすすめ（10000円以下）
     elif price <= 10000:
         prefix = "✨おすすめ"
-        color = 0xF28C28  # オレンジ
+        color = 0xF28C28
 
     # ⑥ 通常
     else:
         prefix = ""
-        color = 0x66CCFF  # 水色
+        color = 0x66CCFF
 
-    # prefix をタイトルに付ける
-    final_title = f"{prefix} {title}" if prefix else title
+    # -----------------------------
+    # prefix はタイトルに付けない
+    # -----------------------------
+    final_title = title
+
+    # -----------------------------
+    # 優先度フィールドに表示
+    # -----------------------------
+    priority_label = prefix if prefix else "—"
 
     embed = {
         "title": final_title,
         "url": url,
         "color": color,
         "fields": [
+            {
+                "name": "優先度",
+                "value": priority_label,
+                "inline": True
+            },
             {
                 "name": "価格",
                 "value": f"**¥{price:,}**",
