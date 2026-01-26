@@ -43,17 +43,17 @@ def safe_post(url, headers=None, json_data=None):
 
 
 def _safe_json(r):
-    if not r:
-        return {"error": "request failed"}
+    # safe_post が dict を返す場合
+    if isinstance(r, dict):
+        return r
 
-    # 204 No Content は成功扱い
-    if r.status_code == 204:
-        return {"status": "success", "code": 204}
-
+    # safe_post が Response を返す場合（古い形式）
     try:
+        if r.status_code == 204:
+            return {"status": 204}
         return r.json()
     except Exception:
-        return {"status": "success", "code": r.status_code}
+        return {"status": r.status_code}
 
 
 def send_webhook_message(title, embeds):
