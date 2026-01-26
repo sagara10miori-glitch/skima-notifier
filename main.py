@@ -162,13 +162,13 @@ def main():
     # ---------------------------------------------------------
     # 送信成功時のみピン固定 & 既読登録
     # ---------------------------------------------------------
-    if result.get("status") == 204:
+    if not result or result.get("status") == 204:
         # ピン固定
         last_pin = load_last_pin()
         if last_pin:
             unpin_message(last_pin["id"])
-        pin_message(result["id"])
-        save_last_pin(result["id"])
+        pin_message(result.get("id"))
+        save_last_pin(result.get("id"))
     
         # 既読登録
         for item_id in ids:
