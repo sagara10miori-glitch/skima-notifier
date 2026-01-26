@@ -162,16 +162,18 @@ def main():
     # ---------------------------------------------------------
     # 送信成功時のみピン固定 & 既読登録
     # ---------------------------------------------------------
-    if "id" in result:
+    if result.get("status") == 204:
+        # ピン固定
         last_pin = load_last_pin()
         if last_pin:
             unpin_message(last_pin["id"])
         pin_message(result["id"])
         save_last_pin(result["id"])
-
+    
+        # 既読登録
         for item_id in ids:
             seen.add(item_id)
-
+    
         print("[INFO] seen updated (send success)")
     else:
         print("[WARN] send failed → seen not updated")
