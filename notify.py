@@ -19,6 +19,8 @@ def safe_post(url, headers=None, json_data=None):
     for attempt in range(3):
         try:
             r = requests.post(url, headers=headers, json=json_data, timeout=10)
+            print("[DEBUG] status:", r.status_code)
+            print("[DEBUG] body:", r.text)
             last_response = r
 
             # 成功（200〜299）
