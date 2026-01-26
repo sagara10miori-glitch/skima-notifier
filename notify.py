@@ -12,7 +12,7 @@ PIN_FILE = "last_pin.json"
 
 def safe_post(url, headers=None, json_data=None):
     if not url:
-        return None
+        return {"status": None}
 
     last_response = None
 
@@ -25,7 +25,7 @@ def safe_post(url, headers=None, json_data=None):
 
             # 成功（200〜299）
             if 200 <= r.status_code < 300:
-                return r
+                return {"status": r.status_code}
 
             # レートリミット
             if r.status_code == 429:
@@ -38,7 +38,8 @@ def safe_post(url, headers=None, json_data=None):
 
         time.sleep(1.5 * (attempt + 1))
 
-    return last_response
+    # 失敗時
+    return {"status": last_response.status_code if last_response else None}
 
 
 def _safe_json(r):
